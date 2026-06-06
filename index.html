@@ -1,2758 +1,888 @@
 <!DOCTYPE html>
 <html lang="fr">
-
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SocialLink — Présentation Soutenance 2025</title>
-    <link
-        href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;800;900&family=Inter:wght@300;400;500;600&display=swap"
-        rel="stylesheet">
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box
-        }
-
-        :root {
-            --noir: #0A0A0A;
-            --bleu: #1565C0;
-            --bleu2: #1E88E5;
-            --or: #D4AF37;
-            --or2: #F5E27A;
-            --blanc: #FFFFFF;
-            --creme: #F5F8FF;
-            --creme2: #EEF4FF;
-            --muted: rgba(26, 35, 64, 0.5);
-            --muted2: rgba(21, 101, 192, 0.15);
-            --surface: #E3F0FF;
-        }
-
-        html,
-        body {
-            width: 100%;
-            height: 100%;
-            overflow: hidden;
-            background: var(--noir);
-            font-family: 'Inter', sans-serif;
-            cursor: none
-        }
-
-        #cursor {
-            position: fixed;
-            width: 10px;
-            height: 10px;
-            background: var(--or);
-            border-radius: 50%;
-            pointer-events: none;
-            z-index: 9999;
-            transform: translate(-50%, -50%);
-            transition: width .2s, height .2s;
-            mix-blend-mode: normal
-        }
-
-        #cursor.big {
-            width: 36px;
-            height: 36px;
-            background: rgba(212, 175, 55, .3)
-        }
-
-        #stage {
-            position: fixed;
-            inset: 0;
-            overflow: hidden
-        }
-
-        #world {
-            position: absolute;
-            width: 9000px;
-            height: 5500px;
-            transform-origin: 0 0;
-            will-change: transform
-        }
-
-        #progress {
-            position: fixed;
-            top: 0;
-            left: 0;
-            height: 3px;
-            background: linear-gradient(90deg, var(--or), var(--or2));
-            z-index: 1001;
-            transition: width .7s ease;
-            width: 0
-        }
-
-        #hud-title {
-            position: fixed;
-            top: 18px;
-            left: 50%;
-            transform: translateX(-50%);
-            color: rgba(255, 255, 255, .3);
-            font-size: 11px;
-            letter-spacing: 3px;
-            text-transform: uppercase;
-            z-index: 1000;
-            pointer-events: none
-        }
-
-        #keyhint {
-            position: fixed;
-            top: 18px;
-            right: 20px;
-            color: rgba(255, 255, 255, .2);
-            font-size: 10px;
-            z-index: 1000;
-            line-height: 1.9
-        }
-
-        #ov-btn {
-            position: fixed;
-            top: 14px;
-            left: 20px;
-            background: rgba(10, 10, 10, .9);
-            border: 1px solid rgba(212, 175, 55, .2);
-            color: rgba(212, 175, 55, .6);
-            padding: 7px 14px;
-            border-radius: 7px;
-            font-size: 11px;
-            cursor: pointer;
-            z-index: 1000;
-            letter-spacing: 1px;
-            transition: color .2s
-        }
-
-        #ov-btn:hover {
-            color: var(--or)
-        }
-
-        #hud {
-            position: fixed;
-            bottom: 24px;
-            left: 50%;
-            transform: translateX(-50%);
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            z-index: 1000;
-            background: rgba(10, 10, 10, .92);
-            border: 1px solid rgba(212, 175, 55, .15);
-            padding: 8px 18px;
-            border-radius: 50px
-        }
-
-        .hbtn {
-            background: none;
-            border: none;
-            color: rgba(255, 255, 255, .4);
-            cursor: pointer;
-            font-size: 16px;
-            padding: 3px 8px;
-            transition: color .2s
-        }
-
-        .hbtn:hover {
-            color: var(--or)
-        }
-
-        #counter {
-            color: rgba(255, 255, 255, .3);
-            font-size: 12px;
-            min-width: 50px;
-            text-align: center;
-            font-family: 'Playfair Display', serif
-        }
-
-        #dots {
-            display: flex;
-            gap: 5px;
-            align-items: center
-        }
-
-        .dot {
-            width: 5px;
-            height: 5px;
-            border-radius: 50%;
-            background: rgba(255, 255, 255, .2);
-            cursor: pointer;
-            transition: all .25s
-        }
-
-        .dot.active {
-            background: var(--or);
-            width: 14px;
-            border-radius: 3px
-        }
-
-        .slide {
-            position: absolute;
-            border-radius: 20px;
-            overflow: hidden;
-            font-family: 'Inter', sans-serif
-        }
-
-        .speech-panel {
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            background: rgba(10, 10, 10, .97);
-            border-top: 2px solid var(--or);
-            transform: translateY(100%);
-            transition: transform .4s cubic-bezier(.4, 0, .2, 1);
-            z-index: 50;
-            padding: 22px 32px 24px;
-            max-height: 58%;
-            overflow-y: auto;
-        }
-
-        .speech-panel.open {
-            transform: translateY(0)
-        }
-
-        .sp-header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            margin-bottom: 14px
-        }
-
-        .sp-label {
-            font-size: 10px;
-            font-weight: 700;
-            letter-spacing: 3px;
-            text-transform: uppercase;
-            color: var(--or);
-            font-family: 'Playfair Display', serif
-        }
-
-        .sp-close {
-            background: none;
-            border: 1px solid rgba(255, 255, 255, .2);
-            color: rgba(255, 255, 255, .5);
-            width: 26px;
-            height: 26px;
-            border-radius: 50%;
-            cursor: pointer;
-            font-size: 13px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all .2s;
-            line-height: 1
-        }
-
-        .sp-close:hover {
-            border-color: var(--or);
-            color: var(--or)
-        }
-
-        .sp-points {
-            display: flex;
-            flex-direction: column;
-            gap: 8px
-        }
-
-        .sp-point {
-            display: flex;
-            gap: 12px;
-            align-items: flex-start
-        }
-
-        .sp-bullet {
-            width: 22px;
-            height: 22px;
-            border-radius: 5px;
-            background: var(--or);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 9px;
-            font-weight: 700;
-            color: #000;
-            flex-shrink: 0;
-            font-family: 'Playfair Display', serif;
-            margin-top: 1px
-        }
-
-        .sp-text {
-            font-size: 12.5px;
-            color: rgba(255, 255, 255, .8);
-            line-height: 1.6
-        }
-
-        .sp-text strong {
-            color: #fff;
-            font-weight: 600
-        }
-
-        .sp-divider {
-            height: 1px;
-            background: rgba(255, 255, 255, .07);
-            margin: 4px 0
-        }
-
-        .speech-toggle {
-            position: absolute;
-            bottom: 20px;
-            right: 20px;
-            z-index: 60;
-            background: rgba(10, 10, 10, .85);
-            border: 1px solid rgba(212, 175, 55, .2);
-            color: rgba(255, 255, 255, .5);
-            font-size: 10px;
-            font-weight: 600;
-            letter-spacing: 2px;
-            text-transform: uppercase;
-            padding: 7px 14px;
-            border-radius: 50px;
-            cursor: pointer;
-            font-family: 'Inter', sans-serif;
-            transition: all .2s;
-        }
-
-        .speech-toggle:hover,
-        .speech-toggle.active {
-            border-color: var(--or);
-            color: var(--or)
-        }
-
-        /* ─── UTILITAIRES ─── */
-        .kicker {
-            font-size: 10px;
-            font-weight: 700;
-            letter-spacing: 3px;
-            text-transform: uppercase;
-            color: var(--or);
-            margin-bottom: 12px
-        }
-
-        .slide-title {
-            font-family: 'Playfair Display', serif;
-            font-size: 40px;
-            font-weight: 800;
-            line-height: 1.1
-        }
-
-        .slide-title em {
-            color: var(--or);
-            font-style: normal
-        }
-
-        .slide-sub {
-            font-size: 14px;
-            color: var(--muted);
-            margin-top: 8px;
-            margin-bottom: 28px;
-            line-height: 1.7
-        }
-
-        .gold-line {
-            width: 60px;
-            height: 2px;
-            background: linear-gradient(90deg, var(--or), var(--or2));
-            border-radius: 2px;
-            margin: 12px 0 20px
-        }
-
-        /* ─── S1 — COVER ─── */
-        #s1 {
-            width: 1440px;
-            height: 900px;
-            left: 300px;
-            top: 200px;
-            background: var(--noir)
-        }
-
-        .s1-bg {
-            position: absolute;
-            inset: 0;
-            background: radial-gradient(ellipse 80% 80% at 30% 50%, rgba(21, 101, 192, .15) 0%, transparent 60%)
-        }
-
-        .s1-bg2 {
-            position: absolute;
-            inset: 0;
-            background: radial-gradient(ellipse 60% 60% at 80% 30%, rgba(212, 175, 55, .08) 0%, transparent 60%)
-        }
-
-        .s1-deco1 {
-            position: absolute;
-            top: -80px;
-            right: -80px;
-            width: 400px;
-            height: 400px;
-            border-radius: 50%;
-            border: 1px solid rgba(212, 175, 55, .08)
-        }
-
-        .s1-deco2 {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            width: 240px;
-            height: 240px;
-            border-radius: 50%;
-            border: 1px solid rgba(21, 101, 192, .12)
-        }
-
-        .s1-deco3 {
-            position: absolute;
-            bottom: -60px;
-            left: -60px;
-            width: 300px;
-            height: 300px;
-            border-radius: 50%;
-            border: 1px solid rgba(212, 175, 55, .06)
-        }
-
-        .s1-split {
-            position: absolute;
-            inset: 0;
-            display: grid;
-            grid-template-columns: 1fr 420px
-        }
-
-        .s1-left {
-            padding: 70px 80px;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between
-        }
-
-        .s1-eyebrow {
-            font-size: 11px;
-            font-weight: 600;
-            letter-spacing: 4px;
-            text-transform: uppercase;
-            color: var(--or);
-            margin-bottom: 24px
-        }
-
-        .s1-title {
-            font-family: 'Playfair Display', serif;
-            font-size: 82px;
-            font-weight: 900;
-            line-height: .95;
-            color: #fff;
-            letter-spacing: -.01em
-        }
-
-        .s1-title em {
-            color: var(--or);
-            font-style: normal
-        }
-
-        .s1-sub {
-            font-size: 15px;
-            color: rgba(255, 255, 255, .5);
-            line-height: 1.75;
-            max-width: 500px;
-            margin-top: 24px
-        }
-
-        .s1-meta {
-            font-size: 11px;
-            letter-spacing: 3px;
-            color: rgba(255, 255, 255, .2);
-            text-transform: uppercase
-        }
-
-        .s1-right {
-            background: rgba(21, 101, 192, .08);
-            border-left: 1px solid rgba(212, 175, 55, .15);
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            padding: 60px 48px;
-            gap: 32px
-        }
-
-        .s1-stat {
-            border-bottom: 1px solid rgba(255, 255, 255, .06);
-            padding-bottom: 32px
-        }
-
-        .s1-stat:last-child {
-            border-bottom: none;
-            padding-bottom: 0
-        }
-
-        .s1-stat-n {
-            font-family: 'Playfair Display', serif;
-            font-size: 52px;
-            font-weight: 900;
-            color: #fff;
-            line-height: 1
-        }
-
-        .s1-stat-n em {
-            font-size: 22px;
-            color: var(--or);
-            font-style: normal
-        }
-
-        .s1-stat-l {
-            font-size: 12px;
-            color: rgba(255, 255, 255, .35);
-            margin-top: 6px;
-            line-height: 1.5
-        }
-
-        .s1-badge {
-            position: absolute;
-            top: 68px;
-            right: 440px;
-            background: rgba(21, 101, 192, .15);
-            border: 1px solid rgba(21, 101, 192, .4);
-            color: var(--bleu2);
-            font-size: 10px;
-            letter-spacing: 2px;
-            padding: 5px 14px;
-            border-radius: 50px;
-            font-weight: 600;
-            text-transform: uppercase
-        }
-
-        .s1-badge::before {
-            content: '';
-            width: 6px;
-            height: 6px;
-            background: var(--bleu2);
-            border-radius: 50%;
-            display: inline-block;
-            margin-right: 7px;
-            animation: blink 2s ease-in-out infinite
-        }
-
-        @keyframes blink {
-
-            0%,
-            100% {
-                opacity: 1
-            }
-
-            50% {
-                opacity: .3
-            }
-        }
-
-        /* ─── S2 — PLAN ─── */
-        #s2 {
-            width: 1200px;
-            height: 780px;
-            left: 2060px;
-            top: 180px;
-            background: var(--creme2)
-        }
-
-        .s2-pad {
-            padding: 52px 56px
-        }
-
-        .plan-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 14px;
-            margin-top: 28px
-        }
-
-        .plan-card {
-            background: #fff;
-            border: 1px solid var(--muted2);
-            border-radius: 12px;
-            padding: 22px;
-            position: relative;
-            overflow: hidden;
-            transition: border-color .2s
-        }
-
-        .plan-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 3px;
-            background: linear-gradient(90deg, var(--bleu), var(--or))
-        }
-
-        .plan-card:hover {
-            border-color: rgba(21, 101, 192, .3)
-        }
-
-        .pc-num {
-            font-size: 10px;
-            letter-spacing: 2px;
-            color: var(--bleu);
-            font-weight: 700;
-            margin-bottom: 8px;
-            text-transform: uppercase
-        }
-
-        .pc-title {
-            font-family: 'Playfair Display', serif;
-            font-size: 17px;
-            color: #1A2340;
-            font-weight: 700;
-            margin-bottom: 4px
-        }
-
-        .pc-slides {
-            font-size: 10px;
-            color: rgba(26, 35, 64, .3);
-            letter-spacing: 1px;
-            margin-bottom: 6px
-        }
-
-        .pc-desc {
-            font-size: 12px;
-            color: var(--muted);
-            line-height: 1.5
-        }
-
-        /* ─── S3 — PROBLÈME ─── */
-        #s3 {
-            width: 1320px;
-            height: 820px;
-            left: 3560px;
-            top: 140px;
-            background: var(--noir)
-        }
-
-        .s3-glow {
-            position: absolute;
-            width: 700px;
-            height: 700px;
-            right: -200px;
-            top: -200px;
-            background: radial-gradient(circle, rgba(21, 101, 192, .18) 0%, transparent 70%);
-            pointer-events: none
-        }
-
-        .s3-glow2 {
-            position: absolute;
-            width: 400px;
-            height: 400px;
-            left: -100px;
-            bottom: -100px;
-            background: radial-gradient(circle, rgba(212, 175, 55, .08) 0%, transparent 70%);
-            pointer-events: none
-        }
-
-        .s3-pad {
-            padding: 56px 64px
-        }
-
-        .big-stat {
-            font-family: 'Playfair Display', serif;
-            font-size: 110px;
-            font-weight: 900;
-            color: #fff;
-            line-height: 1
-        }
-
-        .big-stat em {
-            color: var(--or);
-            font-style: normal
-        }
-
-        .big-lbl {
-            font-size: 17px;
-            color: rgba(255, 255, 255, .45);
-            max-width: 560px;
-            line-height: 1.7;
-            margin-bottom: 48px
-        }
-
-        .s3-metrics {
-            display: flex;
-            gap: 20px
-        }
-
-        .s3-m {
-            background: rgba(255, 255, 255, .04);
-            border: 1px solid rgba(255, 255, 255, .08);
-            border-radius: 14px;
-            padding: 24px 28px;
-            flex: 1
-        }
-
-        .s3-mn {
-            font-family: 'Playfair Display', serif;
-            font-size: 44px;
-            color: #fff;
-            font-weight: 800;
-            line-height: 1
-        }
-
-        .s3-mn em {
-            font-size: 20px;
-            color: var(--or);
-            font-style: normal
-        }
-
-        .s3-ml {
-            font-size: 11px;
-            color: rgba(255, 255, 255, .35);
-            margin-top: 7px;
-            line-height: 1.5
-        }
-
-        /* ─── S4 — SOLUTION ─── */
-        #s4 {
-            width: 1300px;
-            height: 820px;
-            left: 5200px;
-            top: 160px;
-            background: #fff
-        }
-
-        .s4-pad {
-            padding: 52px 60px
-        }
-
-        .flow-steps {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 14px;
-            margin: 28px 0
-        }
-
-        .flow-step {
-            background: var(--creme2);
-            border: 1px solid var(--muted2);
-            border-radius: 14px;
-            padding: 24px;
-            position: relative
-        }
-
-        .flow-step::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 3px;
-            background: linear-gradient(90deg, var(--bleu), var(--or))
-        }
-
-        .fs-num {
-            font-family: 'Playfair Display', serif;
-            font-size: 36px;
-            color: var(--bleu);
-            font-weight: 900;
-            opacity: .2;
-            line-height: 1;
-            margin-bottom: 8px
-        }
-
-        .fs-title {
-            font-family: 'Playfair Display', serif;
-            font-size: 18px;
-            color: #1A2340;
-            font-weight: 700;
-            margin-bottom: 8px
-        }
-
-        .fs-desc {
-            font-size: 12px;
-            color: var(--muted);
-            line-height: 1.6
-        }
-
-        .s4-tags {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 8px;
-            margin-top: 24px
-        }
-
-        .tag {
-            background: var(--creme2);
-            border: 1px solid var(--muted2);
-            border-radius: 8px;
-            padding: 6px 14px;
-            font-size: 11.5px;
-            color: #1A2340
-        }
-
-        .tag.blue {
-            background: rgba(21, 101, 192, .08);
-            border-color: rgba(21, 101, 192, .2);
-            color: var(--bleu)
-        }
-
-        .tag.gold {
-            background: rgba(212, 175, 55, .08);
-            border-color: rgba(212, 175, 55, .3);
-            color: #8a6810
-        }
-
-        /* ─── S5 — ROLES ─── */
-        #s5 {
-            width: 1320px;
-            height: 820px;
-            left: 300px;
-            top: 1440px;
-            background: var(--creme)
-        }
-
-        .s5-pad {
-            padding: 52px 60px
-        }
-
-        .roles-grid {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 14px;
-            margin-top: 28px
-        }
-
-        .role-card {
-            border-radius: 16px;
-            padding: 28px 22px;
-            position: relative;
-            overflow: hidden;
-            border: 1px solid transparent
-        }
-
-        .role-card::before {
-            content: '';
-            position: absolute;
-            inset: 0;
-            opacity: .06;
-            border-radius: 16px
-        }
-
-        .rc-ong {
-            background: rgba(21, 101, 192, .06);
-            border-color: rgba(21, 101, 192, .2)
-        }
-
-        .rc-bailleur {
-            background: rgba(212, 175, 55, .06);
-            border-color: rgba(212, 175, 55, .25)
-        }
-
-        .rc-benef {
-            background: rgba(46, 125, 50, .06);
-            border-color: rgba(46, 125, 50, .2)
-        }
-
-        .rc-admin {
-            background: rgba(10, 10, 10, .04);
-            border-color: rgba(10, 10, 10, .12)
-        }
-
-        .rc-icon {
-            font-size: 32px;
-            margin-bottom: 14px;
-            display: block
-        }
-
-        .rc-title {
-            font-family: 'Playfair Display', serif;
-            font-size: 18px;
-            font-weight: 700;
-            color: #1A2340;
-            margin-bottom: 8px
-        }
-
-        .rc-items {
-            font-size: 11.5px;
-            color: var(--muted);
-            line-height: 1.9
-        }
-
-        .rc-badge {
-            display: inline-block;
-            margin-top: 12px;
-            padding: 3px 10px;
-            border-radius: 20px;
-            font-size: 10px;
-            font-weight: 700;
-            letter-spacing: 1px
-        }
-
-        .rc-badge.blue {
-            background: rgba(21, 101, 192, .12);
-            color: var(--bleu)
-        }
-
-        .rc-badge.gold {
-            background: rgba(212, 175, 55, .15);
-            color: #8a6810
-        }
-
-        .rc-badge.green {
-            background: rgba(46, 125, 50, .1);
-            color: #2E7D32
-        }
-
-        .rc-badge.dark {
-            background: rgba(10, 10, 10, .08);
-            color: #1A2340
-        }
-
-        /* ─── S6 — FONCTIONNALITES ─── */
-        #s6 {
-            width: 1300px;
-            height: 820px;
-            left: 1940px;
-            top: 1440px;
-            background: var(--noir)
-        }
-
-        .s6-pad {
-            padding: 52px 56px
-        }
-
-        .feat-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 14px;
-            margin-top: 28px
-        }
-
-        .feat-card {
-            background: rgba(255, 255, 255, .04);
-            border: 1px solid rgba(255, 255, 255, .07);
-            border-radius: 14px;
-            padding: 22px;
-            transition: border-color .2s
-        }
-
-        .feat-card:hover {
-            border-color: rgba(212, 175, 55, .3)
-        }
-
-        .feat-icon {
-            font-size: 26px;
-            margin-bottom: 12px;
-            display: block
-        }
-
-        .feat-title {
-            font-size: 14px;
-            color: #fff;
-            font-weight: 600;
-            margin-bottom: 6px
-        }
-
-        .feat-desc {
-            font-size: 11.5px;
-            color: rgba(255, 255, 255, .4);
-            line-height: 1.6
-        }
-
-        .feat-tag {
-            display: inline-block;
-            margin-top: 8px;
-            background: rgba(212, 175, 55, .1);
-            border: 1px solid rgba(212, 175, 55, .2);
-            border-radius: 6px;
-            padding: 2px 8px;
-            font-size: 9px;
-            color: var(--or);
-            letter-spacing: 1px;
-            font-weight: 600
-        }
-
-        /* ─── S7 — ARCHITECTURE ─── */
-        #s7 {
-            width: 1320px;
-            height: 820px;
-            left: 3480px;
-            top: 1420px;
-            background: var(--creme2)
-        }
-
-        .s7-pad {
-            padding: 52px 60px
-        }
-
-        .tech-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 16px;
-            margin-top: 28px
-        }
-
-        .tech-card {
-            background: #fff;
-            border: 1px solid var(--muted2);
-            border-radius: 14px;
-            padding: 22px;
-            display: flex;
-            gap: 16px;
-            align-items: flex-start
-        }
-
-        .tech-icon {
-            width: 48px;
-            height: 48px;
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 22px;
-            flex-shrink: 0
-        }
-
-        .ti-blue {
-            background: rgba(21, 101, 192, .1)
-        }
-
-        .ti-gold {
-            background: rgba(212, 175, 55, .1)
-        }
-
-        .ti-green {
-            background: rgba(46, 125, 50, .08)
-        }
-
-        .ti-dark {
-            background: rgba(10, 10, 10, .06)
-        }
-
-        .tech-name {
-            font-family: 'Playfair Display', serif;
-            font-size: 16px;
-            font-weight: 700;
-            color: #1A2340;
-            margin-bottom: 4px
-        }
-
-        .tech-desc {
-            font-size: 12px;
-            color: var(--muted);
-            line-height: 1.5
-        }
-
-        .tech-stack {
-            margin-top: 24px;
-            background: var(--noir);
-            border-radius: 14px;
-            padding: 18px 24px;
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-            align-items: center
-        }
-
-        .ts-label {
-            font-size: 10px;
-            letter-spacing: 2px;
-            color: rgba(255, 255, 255, .3);
-            text-transform: uppercase;
-            width: 100%;
-            margin-bottom: 4px
-        }
-
-        .ts-tag {
-            background: rgba(255, 255, 255, .06);
-            border: 1px solid rgba(255, 255, 255, .1);
-            border-radius: 8px;
-            padding: 5px 13px;
-            font-size: 11px;
-            color: rgba(255, 255, 255, .75)
-        }
-
-        /* ─── S8 — CONFIANCE ONG ─── */
-        #s8 {
-            width: 1300px;
-            height: 840px;
-            left: 5200px;
-            top: 1440px;
-            background: var(--noir)
-        }
-
-        .s8-pad {
-            padding: 52px 56px
-        }
-
-        .levels-wrap {
-            display: flex;
-            gap: 16px;
-            margin-top: 28px
-        }
-
-        .level-card {
-            flex: 1;
-            border-radius: 16px;
-            padding: 28px 22px;
-            border: 1px solid;
-            position: relative;
-            overflow: hidden
-        }
-
-        .lc-bronze {
-            background: rgba(205, 127, 50, .06);
-            border-color: rgba(205, 127, 50, .3)
-        }
-
-        .lc-silver {
-            background: rgba(192, 192, 192, .06);
-            border-color: rgba(192, 192, 192, .3)
-        }
-
-        .lc-gold {
-            background: rgba(212, 175, 55, .08);
-            border-color: rgba(212, 175, 55, .4)
-        }
-
-        .lc-plat {
-            background: rgba(229, 228, 226, .06);
-            border-color: rgba(229, 228, 226, .3)
-        }
-
-        .lc-emoji {
-            font-size: 36px;
-            display: block;
-            margin-bottom: 12px
-        }
-
-        .lc-name {
-            font-family: 'Playfair Display', serif;
-            font-size: 20px;
-            font-weight: 800;
-            margin-bottom: 6px
-        }
-
-        .lc-bronze .lc-name {
-            color: #CD7F32
-        }
-
-        .lc-silver .lc-name {
-            color: #C0C0C0
-        }
-
-        .lc-gold .lc-name {
-            color: var(--or)
-        }
-
-        .lc-plat .lc-name {
-            color: #E5E4E2
-        }
-
-        .lc-req {
-            font-size: 11px;
-            color: rgba(255, 255, 255, .4);
-            line-height: 1.7
-        }
-
-        .lc-bar {
-            height: 3px;
-            border-radius: 2px;
-            margin-top: 14px
-        }
-
-        .lc-bronze .lc-bar {
-            background: #CD7F32;
-            width: 25%
-        }
-
-        .lc-silver .lc-bar {
-            background: #C0C0C0;
-            width: 50%
-        }
-
-        .lc-gold .lc-bar {
-            background: var(--or);
-            width: 75%
-        }
-
-        .lc-plat .lc-bar {
-            background: #E5E4E2;
-            width: 100%
-        }
-
-        .s8-note {
-            margin-top: 20px;
-            background: rgba(212, 175, 55, .06);
-            border: 1px solid rgba(212, 175, 55, .2);
-            border-radius: 12px;
-            padding: 16px 22px;
-            font-size: 13px;
-            color: rgba(255, 255, 255, .6);
-            line-height: 1.6
-        }
-
-        .s8-note em {
-            color: var(--or);
-            font-style: normal
-        }
-
-        /* ─── S9 — MESSAGERIE ─── */
-        #s9 {
-            width: 1260px;
-            height: 800px;
-            left: 680px;
-            top: 2780px;
-            background: var(--creme)
-        }
-
-        .s9-pad {
-            padding: 52px 56px
-        }
-
-        .msg-flow {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 16px;
-            margin-top: 28px
-        }
-
-        .msg-step {
-            background: #fff;
-            border: 1px solid var(--muted2);
-            border-radius: 16px;
-            padding: 26px;
-            position: relative
-        }
-
-        .msg-step::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 3px;
-            border-radius: 16px 16px 0 0
-        }
-
-        .ms1::before {
-            background: var(--bleu)
-        }
-
-        .ms2::before {
-            background: linear-gradient(90deg, var(--bleu), var(--or))
-        }
-
-        .ms3::before {
-            background: var(--or)
-        }
-
-        .ms-icon {
-            font-size: 28px;
-            display: block;
-            margin-bottom: 12px
-        }
-
-        .ms-title {
-            font-family: 'Playfair Display', serif;
-            font-size: 18px;
-            font-weight: 700;
-            color: #1A2340;
-            margin-bottom: 8px
-        }
-
-        .ms-desc {
-            font-size: 12px;
-            color: var(--muted);
-            line-height: 1.6
-        }
-
-        .ms-tag {
-            display: inline-block;
-            margin-top: 10px;
-            background: var(--creme2);
-            border: 1px solid var(--muted2);
-            border-radius: 8px;
-            padding: 3px 10px;
-            font-size: 10px;
-            color: var(--bleu);
-            font-weight: 600
-        }
-
-        .s9-don {
-            margin-top: 20px;
-            background: var(--noir);
-            border-radius: 16px;
-            padding: 20px 28px;
-            display: flex;
-            align-items: center;
-            gap: 24px
-        }
-
-        .s9-don-icon {
-            font-size: 32px
-        }
-
-        .s9-don-text {
-            flex: 1
-        }
-
-        .s9-don-title {
-            font-family: 'Playfair Display', serif;
-            font-size: 18px;
-            color: #fff;
-            font-weight: 700;
-            margin-bottom: 4px
-        }
-
-        .s9-don-desc {
-            font-size: 12px;
-            color: rgba(255, 255, 255, .4);
-            line-height: 1.5
-        }
-
-        .s9-don-badge {
-            background: linear-gradient(135deg, var(--or), var(--or2));
-            color: #000;
-            padding: 6px 16px;
-            border-radius: 20px;
-            font-size: 11px;
-            font-weight: 700;
-            letter-spacing: 1px;
-            white-space: nowrap
-        }
-
-        /* ─── S10 — CARTE ─── */
-        #s10 {
-            width: 1200px;
-            height: 760px;
-            left: 2240px;
-            top: 2820px;
-            background: var(--noir)
-        }
-
-        .s10-pad {
-            padding: 52px 56px
-        }
-
-        .map-features {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 14px;
-            margin-top: 28px
-        }
-
-        .mf-card {
-            background: rgba(255, 255, 255, .04);
-            border: 1px solid rgba(255, 255, 255, .07);
-            border-radius: 14px;
-            padding: 22px;
-            display: flex;
-            gap: 14px;
-            align-items: flex-start
-        }
-
-        .mf-icon {
-            width: 44px;
-            height: 44px;
-            border-radius: 10px;
-            background: linear-gradient(135deg, var(--bleu), var(--bleu2));
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 20px;
-            flex-shrink: 0
-        }
-
-        .mf-title {
-            font-size: 14px;
-            color: #fff;
-            font-weight: 600;
-            margin-bottom: 4px
-        }
-
-        .mf-desc {
-            font-size: 11.5px;
-            color: rgba(255, 255, 255, .4);
-            line-height: 1.5
-        }
-
-        .s10-osm {
-            margin-top: 20px;
-            background: rgba(21, 101, 192, .08);
-            border: 1px solid rgba(21, 101, 192, .2);
-            border-radius: 12px;
-            padding: 14px 20px;
-            font-size: 12px;
-            color: rgba(255, 255, 255, .5);
-            line-height: 1.6;
-            display: flex;
-            align-items: center;
-            gap: 12px
-        }
-
-        .s10-osm em {
-            color: var(--bleu2);
-            font-style: normal
-        }
-
-        /* ─── S11 — ADMIN ─── */
-        #s11 {
-            width: 1200px;
-            height: 760px;
-            left: 3740px;
-            top: 2800px;
-            background: var(--creme2)
-        }
-
-        .s11-pad {
-            padding: 52px 56px
-        }
-
-        .admin-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 16px;
-            margin-top: 28px
-        }
-
-        .admin-card {
-            background: #fff;
-            border: 1px solid var(--muted2);
-            border-radius: 14px;
-            padding: 24px;
-            position: relative;
-            overflow: hidden
-        }
-
-        .admin-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            bottom: 0;
-            width: 3px;
-            background: linear-gradient(180deg, var(--bleu), var(--or))
-        }
-
-        .ac-icon {
-            font-size: 26px;
-            margin-bottom: 10px
-        }
-
-        .ac-title {
-            font-family: 'Playfair Display', serif;
-            font-size: 16px;
-            font-weight: 700;
-            color: #1A2340;
-            margin-bottom: 6px
-        }
-
-        .ac-desc {
-            font-size: 11.5px;
-            color: var(--muted);
-            line-height: 1.6
-        }
-
-        .ac-note {
-            display: inline-block;
-            margin-top: 8px;
-            background: var(--creme2);
-            border: 1px solid var(--muted2);
-            border-radius: 6px;
-            padding: 2px 8px;
-            font-size: 9px;
-            color: var(--bleu);
-            font-weight: 700;
-            letter-spacing: 1px;
-            text-transform: uppercase
-        }
-
-        /* ─── S12 — ROADMAP TECHNIQUE ─── */
-        #s12 {
-            width: 1420px;
-            height: 800px;
-            left: 5240px;
-            top: 2780px;
-            background: var(--noir)
-        }
-
-        .s12-pad {
-            padding: 52px 60px
-        }
-
-        .roadmap-track {
-            position: relative;
-            display: flex;
-            align-items: flex-start;
-            gap: 0
-        }
-
-        .rm-line {
-            position: absolute;
-            top: 30px;
-            left: 30px;
-            right: 30px;
-            height: 1px;
-            background: rgba(255, 255, 255, .08);
-            z-index: 1
-        }
-
-        .rm-phase {
-            flex: 1;
-            text-align: center;
-            position: relative;
-            z-index: 2
-        }
-
-        .rm-dot {
-            width: 60px;
-            height: 60px;
-            border-radius: 50%;
-            border: 2px solid rgba(255, 255, 255, .12);
-            background: var(--noir);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 0 auto 14px;
-            font-size: 20px
-        }
-
-        .rm-dot.on {
-            background: linear-gradient(135deg, var(--bleu), var(--or));
-            border-color: transparent
-        }
-
-        .rm-period {
-            font-size: 10px;
-            color: var(--or);
-            letter-spacing: 1px;
-            margin-bottom: 5px;
-            font-weight: 700;
-            text-transform: uppercase
-        }
-
-        .rm-title {
-            font-family: 'Playfair Display', serif;
-            font-size: 14px;
-            color: #fff;
-            font-weight: 700;
-            margin-bottom: 6px
-        }
-
-        .rm-pts {
-            font-size: 11px;
-            color: rgba(255, 255, 255, .4);
-            line-height: 1.7
-        }
-
-        .rm-badge {
-            display: inline-block;
-            background: rgba(212, 175, 55, .1);
-            border: 1px solid rgba(212, 175, 55, .2);
-            border-radius: 6px;
-            padding: 3px 9px;
-            font-size: 10px;
-            color: var(--or);
-            margin-top: 7px;
-            font-weight: 600
-        }
-
-        .firebase-strip {
-            margin-top: 36px;
-            background: rgba(255, 193, 7, .06);
-            border: 1px solid rgba(255, 193, 7, .15);
-            border-radius: 12px;
-            padding: 16px 24px;
-            font-size: 12px;
-            color: rgba(255, 255, 255, .5);
-            line-height: 1.65
-        }
-
-        .firebase-strip strong {
-            color: #FFC107;
-            font-weight: 600
-        }
-
-        /* ─── S13 — VISION ─── */
-        #s13 {
-            width: 1320px;
-            height: 860px;
-            left: 5500px;
-            top: 120px;
-            background: var(--noir)
-        }
-
-        .s13-bg {
-            position: absolute;
-            inset: 0;
-            background: radial-gradient(ellipse 80% 80% at 50% 45%, rgba(21, 101, 192, .2) 0%, rgba(212, 175, 55, .06) 55%, transparent 80%)
-        }
-
-        .s13-pad {
-            position: relative;
-            padding: 0 100px;
-            height: 100%;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            text-align: center
-        }
-
-        .s13-eyebrow {
-            font-size: 10px;
-            letter-spacing: 4px;
-            color: var(--or);
-            text-transform: uppercase;
-            margin-bottom: 24px;
-            font-weight: 600
-        }
-
-        .s13-title {
-            font-family: 'Playfair Display', serif;
-            font-size: 52px;
-            color: #fff;
-            font-weight: 900;
-            line-height: 1.12;
-            margin-bottom: 20px
-        }
-
-        .s13-title em {
-            color: var(--or);
-            font-style: normal
-        }
-
-        .s13-sub {
-            font-size: 15px;
-            color: rgba(255, 255, 255, .4);
-            max-width: 500px;
-            line-height: 1.8;
-            margin-bottom: 44px
-        }
-
-        .s13-stats {
-            display: flex;
-            gap: 32px;
-            margin-bottom: 44px
-        }
-
-        .s13-stat {
-            text-align: center
-        }
-
-        .s13-stat-n {
-            font-family: 'Playfair Display', serif;
-            font-size: 32px;
-            font-weight: 900;
-            background: linear-gradient(135deg, var(--or), var(--or2));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent
-        }
-
-        .s13-stat-l {
-            font-size: 11px;
-            color: rgba(255, 255, 255, .3);
-            letter-spacing: 1px;
-            margin-top: 4px
-        }
-
-        .s13-logo {
-            font-family: 'Playfair Display', serif;
-            font-size: 28px;
-            color: rgba(255, 255, 255, .12);
-            font-weight: 900;
-            letter-spacing: .15em
-        }
-
-        .s13-tagline {
-            font-size: 13px;
-            color: rgba(255, 255, 255, .3);
-            margin-bottom: 8px;
-            letter-spacing: 1px
-        }
-
-        .fade-in {
-            opacity: 0;
-            animation: fi .7s ease forwards
-        }
-
-        @keyframes fi {
-            to {
-                opacity: 1
-            }
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SocialLink — Présentation Soutenance 2025</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;800;900&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --noir:#0A0A0A;
+  --bleu:#1565C0;
+  --bleu2:#1E88E5;
+  --or:#D4AF37;
+  --or2:#F5E27A;
+  --blanc:#FFFFFF;
+  --creme:#F5F8FF;
+  --creme2:#EEF4FF;
+  --muted:rgba(26,35,64,0.5);
+  --muted2:rgba(21,101,192,0.15);
+  --surface:#E3F0FF;
+}
+html,body{width:100%;height:100%;overflow:hidden;background:var(--noir);font-family:'Inter',sans-serif;cursor:none}
+
+#cursor{position:fixed;width:10px;height:10px;background:var(--or);border-radius:50%;pointer-events:none;z-index:9999;transform:translate(-50%,-50%);transition:width .2s,height .2s;mix-blend-mode:normal}
+#cursor.big{width:36px;height:36px;background:rgba(212,175,55,.3)}
+
+#stage{position:fixed;inset:0;overflow:hidden}
+#world{position:absolute;width:9000px;height:5500px;transform-origin:0 0;will-change:transform}
+
+#progress{position:fixed;top:0;left:0;height:3px;background:linear-gradient(90deg,var(--or),var(--or2));z-index:1001;transition:width .7s ease;width:0}
+
+#hud-title{position:fixed;top:18px;left:50%;transform:translateX(-50%);color:rgba(255,255,255,.3);font-size:11px;letter-spacing:3px;text-transform:uppercase;z-index:1000;pointer-events:none}
+
+#keyhint{position:fixed;top:18px;right:20px;color:rgba(255,255,255,.2);font-size:10px;z-index:1000;line-height:1.9}
+
+#ov-btn{position:fixed;top:14px;left:20px;background:rgba(10,10,10,.9);border:1px solid rgba(212,175,55,.2);color:rgba(212,175,55,.6);padding:7px 14px;border-radius:7px;font-size:11px;cursor:pointer;z-index:1000;letter-spacing:1px;transition:color .2s}
+#ov-btn:hover{color:var(--or)}
+
+#hud{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);display:flex;align-items:center;gap:10px;z-index:1000;background:rgba(10,10,10,.92);border:1px solid rgba(212,175,55,.15);padding:8px 18px;border-radius:50px}
+.hbtn{background:none;border:none;color:rgba(255,255,255,.4);cursor:pointer;font-size:16px;padding:3px 8px;transition:color .2s}
+.hbtn:hover{color:var(--or)}
+#counter{color:rgba(255,255,255,.3);font-size:12px;min-width:50px;text-align:center;font-family:'Playfair Display',serif}
+#dots{display:flex;gap:5px;align-items:center}
+.dot{width:5px;height:5px;border-radius:50%;background:rgba(255,255,255,.2);cursor:pointer;transition:all .25s}
+.dot.active{background:var(--or);width:14px;border-radius:3px}
+
+.slide{position:absolute;border-radius:20px;overflow:hidden;font-family:'Inter',sans-serif}
+
+.speech-panel{
+  position:absolute;bottom:0;left:0;right:0;
+  background:rgba(10,10,10,.97);
+  border-top:2px solid var(--or);
+  transform:translateY(100%);
+  transition:transform .4s cubic-bezier(.4,0,.2,1);
+  z-index:50;padding:22px 32px 24px;
+  max-height:58%;overflow-y:auto;
+}
+.speech-panel.open{transform:translateY(0)}
+.sp-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.sp-label{font-size:10px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:var(--or);font-family:'Playfair Display',serif}
+.sp-close{background:none;border:1px solid rgba(255,255,255,.2);color:rgba(255,255,255,.5);width:26px;height:26px;border-radius:50%;cursor:pointer;font-size:13px;display:flex;align-items:center;justify-content:center;transition:all .2s;line-height:1}
+.sp-close:hover{border-color:var(--or);color:var(--or)}
+.sp-points{display:flex;flex-direction:column;gap:8px}
+.sp-point{display:flex;gap:12px;align-items:flex-start}
+.sp-bullet{width:22px;height:22px;border-radius:5px;background:var(--or);display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:#000;flex-shrink:0;font-family:'Playfair Display',serif;margin-top:1px}
+.sp-text{font-size:12.5px;color:rgba(255,255,255,.8);line-height:1.6}
+.sp-text strong{color:#fff;font-weight:600}
+.sp-divider{height:1px;background:rgba(255,255,255,.07);margin:4px 0}
+.speech-toggle{
+  position:absolute;bottom:20px;right:20px;z-index:60;
+  background:rgba(10,10,10,.85);border:1px solid rgba(212,175,55,.2);
+  color:rgba(255,255,255,.5);font-size:10px;font-weight:600;letter-spacing:2px;
+  text-transform:uppercase;padding:7px 14px;border-radius:50px;cursor:pointer;
+  font-family:'Inter',sans-serif;transition:all .2s;
+}
+.speech-toggle:hover,.speech-toggle.active{border-color:var(--or);color:var(--or)}
+
+/* ─── UTILITAIRES ─── */
+.kicker{font-size:10px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:var(--or);margin-bottom:12px}
+.slide-title{font-family:'Playfair Display',serif;font-size:40px;font-weight:800;line-height:1.1}
+.slide-title em{color:var(--or);font-style:normal}
+.slide-sub{font-size:14px;color:var(--muted);margin-top:8px;margin-bottom:28px;line-height:1.7}
+.gold-line{width:60px;height:2px;background:linear-gradient(90deg,var(--or),var(--or2));border-radius:2px;margin:12px 0 20px}
+
+/* ─── S1 — COVER ─── */
+#s1{width:1440px;height:900px;left:200px;top:200px;background:var(--noir)}
+.s1-bg{position:absolute;inset:0;background:radial-gradient(ellipse 80% 80% at 30% 50%,rgba(21,101,192,.15) 0%,transparent 60%)}
+.s1-bg2{position:absolute;inset:0;background:radial-gradient(ellipse 60% 60% at 80% 30%,rgba(212,175,55,.08) 0%,transparent 60%)}
+.s1-deco1{position:absolute;top:-80px;right:-80px;width:400px;height:400px;border-radius:50%;border:1px solid rgba(212,175,55,.08)}
+.s1-deco2{position:absolute;top:20px;right:20px;width:240px;height:240px;border-radius:50%;border:1px solid rgba(21,101,192,.12)}
+.s1-deco3{position:absolute;bottom:-60px;left:-60px;width:300px;height:300px;border-radius:50%;border:1px solid rgba(212,175,55,.06)}
+.s1-split{position:absolute;inset:0;display:grid;grid-template-columns:1fr 420px}
+.s1-left{padding:70px 80px;display:flex;flex-direction:column;justify-content:space-between}
+.s1-eyebrow{font-size:11px;font-weight:600;letter-spacing:4px;text-transform:uppercase;color:var(--or);margin-bottom:24px}
+.s1-title{font-family:'Playfair Display',serif;font-size:82px;font-weight:900;line-height:.95;color:#fff;letter-spacing:-.01em}
+.s1-title em{color:var(--or);font-style:normal}
+.s1-sub{font-size:15px;color:rgba(255,255,255,.5);line-height:1.75;max-width:500px;margin-top:24px}
+.s1-meta{font-size:11px;letter-spacing:3px;color:rgba(255,255,255,.2);text-transform:uppercase}
+.s1-right{background:rgba(21,101,192,.08);border-left:1px solid rgba(212,175,55,.15);display:flex;flex-direction:column;justify-content:center;padding:60px 48px;gap:32px}
+.s1-stat{border-bottom:1px solid rgba(255,255,255,.06);padding-bottom:32px}
+.s1-stat:last-child{border-bottom:none;padding-bottom:0}
+.s1-stat-n{font-family:'Playfair Display',serif;font-size:52px;font-weight:900;color:#fff;line-height:1}
+.s1-stat-n em{font-size:22px;color:var(--or);font-style:normal}
+.s1-stat-l{font-size:12px;color:rgba(255,255,255,.35);margin-top:6px;line-height:1.5}
+.s1-badge{position:absolute;top:68px;right:440px;background:rgba(21,101,192,.15);border:1px solid rgba(21,101,192,.4);color:var(--bleu2);font-size:10px;letter-spacing:2px;padding:5px 14px;border-radius:50px;font-weight:600;text-transform:uppercase}
+.s1-badge::before{content:'';width:6px;height:6px;background:var(--bleu2);border-radius:50%;display:inline-block;margin-right:7px;animation:blink 2s ease-in-out infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+
+/* ─── S2 — PLAN ─── */
+#s2{width:1200px;height:780px;left:2000px;top:200px;background:var(--creme2)}
+.s2-pad{padding:52px 56px}
+.plan-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:28px}
+.plan-card{background:#fff;border:1px solid var(--muted2);border-radius:12px;padding:22px;position:relative;overflow:hidden;transition:border-color .2s}
+.plan-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--bleu),var(--or))}
+.plan-card:hover{border-color:rgba(21,101,192,.3)}
+.pc-num{font-size:10px;letter-spacing:2px;color:var(--bleu);font-weight:700;margin-bottom:8px;text-transform:uppercase}
+.pc-title{font-family:'Playfair Display',serif;font-size:17px;color:#1A2340;font-weight:700;margin-bottom:4px}
+.pc-slides{font-size:10px;color:rgba(26,35,64,.3);letter-spacing:1px;margin-bottom:6px}
+.pc-desc{font-size:12px;color:var(--muted);line-height:1.5}
+
+/* ─── S3 — PROBLÈME ─── */
+#s3{width:1320px;height:820px;left:3500px;top:200px;background:var(--noir)}
+.s3-glow{position:absolute;width:700px;height:700px;right:-200px;top:-200px;background:radial-gradient(circle,rgba(21,101,192,.18) 0%,transparent 70%);pointer-events:none}
+.s3-glow2{position:absolute;width:400px;height:400px;left:-100px;bottom:-100px;background:radial-gradient(circle,rgba(212,175,55,.08) 0%,transparent 70%);pointer-events:none}
+.s3-pad{padding:56px 64px}
+.big-stat{font-family:'Playfair Display',serif;font-size:110px;font-weight:900;color:#fff;line-height:1}
+.big-stat em{color:var(--or);font-style:normal}
+.big-lbl{font-size:17px;color:rgba(255,255,255,.45);max-width:560px;line-height:1.7;margin-bottom:48px}
+.s3-metrics{display:flex;gap:20px}
+.s3-m{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:24px 28px;flex:1}
+.s3-mn{font-family:'Playfair Display',serif;font-size:44px;color:#fff;font-weight:800;line-height:1}
+.s3-mn em{font-size:20px;color:var(--or);font-style:normal}
+.s3-ml{font-size:11px;color:rgba(255,255,255,.35);margin-top:7px;line-height:1.5}
+
+/* ─── S4 — SOLUTION ─── */
+#s4{width:1300px;height:820px;left:200px;top:1400px;background:#fff}
+.s4-pad{padding:52px 60px}
+.flow-steps{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin:28px 0}
+.flow-step{background:var(--creme2);border:1px solid var(--muted2);border-radius:14px;padding:24px;position:relative}
+.flow-step::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--bleu),var(--or))}
+.fs-num{font-family:'Playfair Display',serif;font-size:36px;color:var(--bleu);font-weight:900;opacity:.2;line-height:1;margin-bottom:8px}
+.fs-title{font-family:'Playfair Display',serif;font-size:18px;color:#1A2340;font-weight:700;margin-bottom:8px}
+.fs-desc{font-size:12px;color:var(--muted);line-height:1.6}
+.s4-tags{display:flex;flex-wrap:wrap;gap:8px;margin-top:24px}
+.tag{background:var(--creme2);border:1px solid var(--muted2);border-radius:8px;padding:6px 14px;font-size:11.5px;color:#1A2340}
+.tag.blue{background:rgba(21,101,192,.08);border-color:rgba(21,101,192,.2);color:var(--bleu)}
+.tag.gold{background:rgba(212,175,55,.08);border-color:rgba(212,175,55,.3);color:#8a6810}
+
+/* ─── S5 — ROLES ─── */
+#s5{width:1320px;height:820px;left:1800px;top:1400px;background:var(--creme)}
+.s5-pad{padding:52px 60px}
+.roles-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-top:28px}
+.role-card{border-radius:16px;padding:28px 22px;position:relative;overflow:hidden;border:1px solid transparent}
+.role-card::before{content:'';position:absolute;inset:0;opacity:.06;border-radius:16px}
+.rc-ong{background:rgba(21,101,192,.06);border-color:rgba(21,101,192,.2)}
+.rc-bailleur{background:rgba(212,175,55,.06);border-color:rgba(212,175,55,.25)}
+.rc-benef{background:rgba(46,125,50,.06);border-color:rgba(46,125,50,.2)}
+.rc-admin{background:rgba(10,10,10,.04);border-color:rgba(10,10,10,.12)}
+.rc-icon{font-size:32px;margin-bottom:14px;display:block}
+.rc-title{font-family:'Playfair Display',serif;font-size:18px;font-weight:700;color:#1A2340;margin-bottom:8px}
+.rc-items{font-size:11.5px;color:var(--muted);line-height:1.9}
+.rc-badge{display:inline-block;margin-top:12px;padding:3px 10px;border-radius:20px;font-size:10px;font-weight:700;letter-spacing:1px}
+.rc-badge.blue{background:rgba(21,101,192,.12);color:var(--bleu)}
+.rc-badge.gold{background:rgba(212,175,55,.15);color:#8a6810}
+.rc-badge.green{background:rgba(46,125,50,.1);color:#2E7D32}
+.rc-badge.dark{background:rgba(10,10,10,.08);color:#1A2340}
+
+/* ─── S6 — FONCTIONNALITES ─── */
+#s6{width:1300px;height:820px;left:3400px;top:1400px;background:var(--noir)}
+.s6-pad{padding:52px 56px}
+.feat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:28px}
+.feat-card{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);border-radius:14px;padding:22px;transition:border-color .2s}
+.feat-card:hover{border-color:rgba(212,175,55,.3)}
+.feat-icon{font-size:26px;margin-bottom:12px;display:block}
+.feat-title{font-size:14px;color:#fff;font-weight:600;margin-bottom:6px}
+.feat-desc{font-size:11.5px;color:rgba(255,255,255,.4);line-height:1.6}
+.feat-tag{display:inline-block;margin-top:8px;background:rgba(212,175,55,.1);border:1px solid rgba(212,175,55,.2);border-radius:6px;padding:2px 8px;font-size:9px;color:var(--or);letter-spacing:1px;font-weight:600}
+
+/* ─── S7 — ARCHITECTURE ─── */
+#s7{width:1320px;height:820px;left:200px;top:2600px;background:var(--creme2)}
+.s7-pad{padding:52px 60px}
+.tech-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;margin-top:28px}
+.tech-card{background:#fff;border:1px solid var(--muted2);border-radius:14px;padding:22px;display:flex;gap:16px;align-items:flex-start}
+.tech-icon{width:48px;height:48px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0}
+.ti-blue{background:rgba(21,101,192,.1)}
+.ti-gold{background:rgba(212,175,55,.1)}
+.ti-green{background:rgba(46,125,50,.08)}
+.ti-dark{background:rgba(10,10,10,.06)}
+.tech-name{font-family:'Playfair Display',serif;font-size:16px;font-weight:700;color:#1A2340;margin-bottom:4px}
+.tech-desc{font-size:12px;color:var(--muted);line-height:1.5}
+.tech-stack{margin-top:24px;background:var(--noir);border-radius:14px;padding:18px 24px;display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.ts-label{font-size:10px;letter-spacing:2px;color:rgba(255,255,255,.3);text-transform:uppercase;width:100%;margin-bottom:4px}
+.ts-tag{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:8px;padding:5px 13px;font-size:11px;color:rgba(255,255,255,.75)}
+
+/* ─── S8 — CONFIANCE ONG ─── */
+#s8{width:1300px;height:840px;left:1800px;top:2600px;background:var(--noir)}
+.s8-pad{padding:52px 56px}
+.levels-wrap{display:flex;gap:16px;margin-top:28px}
+.level-card{flex:1;border-radius:16px;padding:28px 22px;border:1px solid;position:relative;overflow:hidden}
+.lc-bronze{background:rgba(205,127,50,.06);border-color:rgba(205,127,50,.3)}
+.lc-silver{background:rgba(192,192,192,.06);border-color:rgba(192,192,192,.3)}
+.lc-gold{background:rgba(212,175,55,.08);border-color:rgba(212,175,55,.4)}
+.lc-plat{background:rgba(229,228,226,.06);border-color:rgba(229,228,226,.3)}
+.lc-emoji{font-size:36px;display:block;margin-bottom:12px}
+.lc-name{font-family:'Playfair Display',serif;font-size:20px;font-weight:800;margin-bottom:6px}
+.lc-bronze .lc-name{color:#CD7F32}
+.lc-silver .lc-name{color:#C0C0C0}
+.lc-gold .lc-name{color:var(--or)}
+.lc-plat .lc-name{color:#E5E4E2}
+.lc-req{font-size:11px;color:rgba(255,255,255,.4);line-height:1.7}
+.lc-bar{height:3px;border-radius:2px;margin-top:14px}
+.lc-bronze .lc-bar{background:#CD7F32;width:25%}
+.lc-silver .lc-bar{background:#C0C0C0;width:50%}
+.lc-gold .lc-bar{background:var(--or);width:75%}
+.lc-plat .lc-bar{background:#E5E4E2;width:100%}
+.s8-note{margin-top:20px;background:rgba(212,175,55,.06);border:1px solid rgba(212,175,55,.2);border-radius:12px;padding:16px 22px;font-size:13px;color:rgba(255,255,255,.6);line-height:1.6}
+.s8-note em{color:var(--or);font-style:normal}
+
+/* ─── S9 — MESSAGERIE ─── */
+#s9{width:1260px;height:800px;left:3400px;top:2600px;background:var(--creme)}
+.s9-pad{padding:52px 56px}
+.msg-flow{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:28px}
+.msg-step{background:#fff;border:1px solid var(--muted2);border-radius:16px;padding:26px;position:relative}
+.msg-step::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;border-radius:16px 16px 0 0}
+.ms1::before{background:var(--bleu)}
+.ms2::before{background:linear-gradient(90deg,var(--bleu),var(--or))}
+.ms3::before{background:var(--or)}
+.ms-icon{font-size:28px;display:block;margin-bottom:12px}
+.ms-title{font-family:'Playfair Display',serif;font-size:18px;font-weight:700;color:#1A2340;margin-bottom:8px}
+.ms-desc{font-size:12px;color:var(--muted);line-height:1.6}
+.ms-tag{display:inline-block;margin-top:10px;background:var(--creme2);border:1px solid var(--muted2);border-radius:8px;padding:3px 10px;font-size:10px;color:var(--bleu);font-weight:600}
+.s9-don{margin-top:20px;background:var(--noir);border-radius:16px;padding:20px 28px;display:flex;align-items:center;gap:24px}
+.s9-don-icon{font-size:32px}
+.s9-don-text{flex:1}
+.s9-don-title{font-family:'Playfair Display',serif;font-size:18px;color:#fff;font-weight:700;margin-bottom:4px}
+.s9-don-desc{font-size:12px;color:rgba(255,255,255,.4);line-height:1.5}
+.s9-don-badge{background:linear-gradient(135deg,var(--or),var(--or2));color:#000;padding:6px 16px;border-radius:20px;font-size:11px;font-weight:700;letter-spacing:1px;white-space:nowrap}
+
+/* ─── S10 — CARTE ─── */
+#s10{width:1200px;height:760px;left:200px;top:3800px;background:var(--noir)}
+.s10-pad{padding:52px 56px}
+.map-features{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;margin-top:28px}
+.mf-card{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);border-radius:14px;padding:22px;display:flex;gap:14px;align-items:flex-start}
+.mf-icon{width:44px;height:44px;border-radius:10px;background:linear-gradient(135deg,var(--bleu),var(--bleu2));display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0}
+.mf-title{font-size:14px;color:#fff;font-weight:600;margin-bottom:4px}
+.mf-desc{font-size:11.5px;color:rgba(255,255,255,.4);line-height:1.5}
+.s10-osm{margin-top:20px;background:rgba(21,101,192,.08);border:1px solid rgba(21,101,192,.2);border-radius:12px;padding:14px 20px;font-size:12px;color:rgba(255,255,255,.5);line-height:1.6;display:flex;align-items:center;gap:12px}
+.s10-osm em{color:var(--bleu2);font-style:normal}
+
+/* ─── S11 — ADMIN ─── */
+#s11{width:1200px;height:760px;left:1700px;top:3800px;background:var(--creme2)}
+.s11-pad{padding:52px 56px}
+.admin-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;margin-top:28px}
+.admin-card{background:#fff;border:1px solid var(--muted2);border-radius:14px;padding:24px;position:relative;overflow:hidden}
+.admin-card::before{content:'';position:absolute;top:0;left:0;bottom:0;width:3px;background:linear-gradient(180deg,var(--bleu),var(--or))}
+.ac-icon{font-size:26px;margin-bottom:10px}
+.ac-title{font-family:'Playfair Display',serif;font-size:16px;font-weight:700;color:#1A2340;margin-bottom:6px}
+.ac-desc{font-size:11.5px;color:var(--muted);line-height:1.6}
+.ac-note{display:inline-block;margin-top:8px;background:var(--creme2);border:1px solid var(--muted2);border-radius:6px;padding:2px 8px;font-size:9px;color:var(--bleu);font-weight:700;letter-spacing:1px;text-transform:uppercase}
+
+/* ─── S12 — ROADMAP TECHNIQUE ─── */
+#s12{width:1420px;height:800px;left:3200px;top:3800px;background:var(--noir)}
+.s12-pad{padding:52px 60px}
+.roadmap-track{position:relative;display:flex;align-items:flex-start;gap:0}
+.rm-line{position:absolute;top:30px;left:30px;right:30px;height:1px;background:rgba(255,255,255,.08);z-index:1}
+.rm-phase{flex:1;text-align:center;position:relative;z-index:2}
+.rm-dot{width:60px;height:60px;border-radius:50%;border:2px solid rgba(255,255,255,.12);background:var(--noir);display:flex;align-items:center;justify-content:center;margin:0 auto 14px;font-size:20px}
+.rm-dot.on{background:linear-gradient(135deg,var(--bleu),var(--or));border-color:transparent}
+.rm-period{font-size:10px;color:var(--or);letter-spacing:1px;margin-bottom:5px;font-weight:700;text-transform:uppercase}
+.rm-title{font-family:'Playfair Display',serif;font-size:14px;color:#fff;font-weight:700;margin-bottom:6px}
+.rm-pts{font-size:11px;color:rgba(255,255,255,.4);line-height:1.7}
+.rm-badge{display:inline-block;background:rgba(212,175,55,.1);border:1px solid rgba(212,175,55,.2);border-radius:6px;padding:3px 9px;font-size:10px;color:var(--or);margin-top:7px;font-weight:600}
+.firebase-strip{margin-top:36px;background:rgba(255,193,7,.06);border:1px solid rgba(255,193,7,.15);border-radius:12px;padding:16px 24px;font-size:12px;color:rgba(255,255,255,.5);line-height:1.65}
+.firebase-strip strong{color:#FFC107;font-weight:600}
+
+/* ─── S13 — VISION ─── */
+#s13{width:1320px;height:860px;left:5000px;top:3800px;background:var(--noir)}
+.s13-bg{position:absolute;inset:0;background:radial-gradient(ellipse 80% 80% at 50% 45%,rgba(21,101,192,.2) 0%,rgba(212,175,55,.06) 55%,transparent 80%)}
+.s13-pad{position:relative;padding:0 100px;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center}
+.s13-eyebrow{font-size:10px;letter-spacing:4px;color:var(--or);text-transform:uppercase;margin-bottom:24px;font-weight:600}
+.s13-title{font-family:'Playfair Display',serif;font-size:52px;color:#fff;font-weight:900;line-height:1.12;margin-bottom:20px}
+.s13-title em{color:var(--or);font-style:normal}
+.s13-sub{font-size:15px;color:rgba(255,255,255,.4);max-width:500px;line-height:1.8;margin-bottom:44px}
+.s13-stats{display:flex;gap:32px;margin-bottom:44px}
+.s13-stat{text-align:center}
+.s13-stat-n{font-family:'Playfair Display',serif;font-size:32px;font-weight:900;background:linear-gradient(135deg,var(--or),var(--or2));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.s13-stat-l{font-size:11px;color:rgba(255,255,255,.3);letter-spacing:1px;margin-top:4px}
+.s13-logo{font-family:'Playfair Display',serif;font-size:28px;color:rgba(255,255,255,.12);font-weight:900;letter-spacing:.15em}
+.s13-tagline{font-size:13px;color:rgba(255,255,255,.3);margin-bottom:8px;letter-spacing:1px}
+
+.fade-in{opacity:0;animation:fi .7s ease forwards}
+@keyframes fi{to{opacity:1}}
+</style>
 </head>
-
 <body>
-    <div id="cursor"></div>
-    <div id="progress"></div>
-    <div id="hud-title">SocialLink — Soutenance 2025</div>
-    <div id="keyhint">← → Espace naviguer &nbsp;·&nbsp; O vue globale &nbsp;·&nbsp; ESC retour</div>
-    <button id="ov-btn" onclick="toggleOverview()">⊞ Vue globale</button>
+<div id="cursor"></div>
+<div id="progress"></div>
+<div id="hud-title">SocialLink — Soutenance 2025</div>
+<div id="keyhint">← → Espace naviguer &nbsp;·&nbsp; O vue globale &nbsp;·&nbsp; ESC retour</div>
+<button id="ov-btn" onclick="toggleOverview()">⊞ Vue globale</button>
 
-    <div id="stage">
-        <div id="world">
+<div id="stage">
+<div id="world">
 
-            <!-- ═══════ S1 — COVER ═══════ -->
-            <div class="slide" id="s1" onclick="goTo(0)">
-                <div class="s1-bg"></div>
-                <div class="s1-bg2"></div>
-                <div class="s1-deco1"></div>
-                <div class="s1-deco2"></div>
-                <div class="s1-deco3"></div>
-                <div class="s1-split">
-                    <div class="s1-left">
-                        <div>
-                            <div class="s1-eyebrow">Présentation · Soutenance 2025</div>
-                            <div class="s1-title">Social<em>Link</em></div>
-                            <div
-                                style="width:70px;height:2px;background:linear-gradient(90deg,#1565C0,#D4AF37);border-radius:2px;margin:16px 0 20px">
-                            </div>
-                            <div class="s1-sub">La plateforme humanitaire qui connecte les ONG, les bailleurs de fonds,
-                                les personnes ressources et les bénéficiaires pour un impact réel en Afrique de l'Ouest.
-                            </div>
-                        </div>
-                        <div class="s1-meta">Développement Web & Mobile · Flutter · Firebase · Cotonou, Bénin</div>
-                    </div>
-                    <div class="s1-right">
-                        <div class="s1-stat">
-                            <div class="s1-stat-n">4<em> rôles</em></div>
-                            <div class="s1-stat-l">ONG · Bailleur<br>Bénéficiaire · Admin</div>
-                        </div>
-                        <div class="s1-stat">
-                            <div class="s1-stat-n">12<em>+</em></div>
-                            <div class="s1-stat-l">Fonctionnalités<br>développées</div>
-                        </div>
-                        <div class="s1-stat">
-                            <div class="s1-stat-n">1<em> app</em></div>
-                            <div class="s1-stat-l">Mobile + Web<br>Firebase Backend</div>
-                        </div>
-                    </div>
-                </div>
-                <div class="s1-badge"> Flutter · Firebase · OpenStreetMap</div>
-                <button class="speech-toggle" onclick="event.stopPropagation();toggleSpeech(this,'sp1')">Notes
-                    ↑</button>
-                <div class="speech-panel" id="sp1">
-                    <div class="sp-header"><span class="sp-label">Ce que tu dis</span><button class="sp-close"
-                            onclick="closeSp('sp1')">✕</button></div>
-                    <div class="sp-points">
-                        <div class="sp-point">
-                            <div class="sp-bullet">1</div>
-                            <div class="sp-text"><strong>L'accroche :</strong> "Bonjour. SocialLink est né d'un constat
-                                simple : en Afrique de l'Ouest, des centaines d'ONG agissent sur le terrain, mais
-                                peinent à trouver des financements. Des milliers de bailleurs souhaitent aider, mais ne
-                                savent pas où donner. Et les bénéficiaires n'ont aucun moyen de connaître les programmes
-                                disponibles près d'eux."</div>
-                        </div>
-                        <div class="sp-divider"></div>
-                        <div class="sp-point">
-                            <div class="sp-bullet">2</div>
-                            <div class="sp-text"><strong>La solution en une phrase :</strong> "SocialLink est la
-                                plateforme qui connecte tous ces acteurs en un seul endroit — mobile, simple, et
-                                accessible."</div>
-                        </div>
-                        <div class="sp-divider"></div>
-                        <div class="sp-point">
-                            <div class="sp-bullet">3</div>
-                            <div class="sp-text"><strong>Les technologies :</strong> "Développée avec Flutter pour
-                                Android, Firebase comme backend cloud, et OpenStreetMap pour la cartographie — sans
-                                aucun frais de carte bancaire."</div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- ═══════ S2 — PLAN ═══════ -->
-            <div class="slide" id="s2" onclick="goTo(1)">
-                <div class="s2-pad">
-                    <div class="kicker">Plan de présentation</div>
-                    <div class="slide-title">Notre cheminement<br>en six temps.</div>
-                    <div class="slide-sub">13 slides pour présenter SocialLink de la problématique à la démonstration
-                        technique.</div>
-                    <div class="plan-grid">
-                        <div class="plan-card">
-                            <div class="pc-num">01</div>
-                            <div class="pc-title">Le Contexte</div>
-                            <div class="pc-slides">Slides 3–4</div>
-                            <div class="pc-desc">Problème & solution proposée</div>
-                        </div>
-                        <div class="plan-card">
-                            <div class="pc-num">02</div>
-                            <div class="pc-title">Les Rôles</div>
-                            <div class="pc-slides">Slides 5–6</div>
-                            <div class="pc-desc">4 profils, fonctionnalités</div>
-                        </div>
-                        <div class="plan-card">
-                            <div class="pc-num">03</div>
-                            <div class="pc-title">L'Architecture</div>
-                            <div class="pc-slides">Slide 7</div>
-                            <div class="pc-desc">Stack technique complet</div>
-                        </div>
-                        <div class="plan-card">
-                            <div class="pc-num">04</div>
-                            <div class="pc-title">Les Fonctions Clés</div>
-                            <div class="pc-slides">Slides 8–11</div>
-                            <div class="pc-desc">Messagerie, carte, dons, admin</div>
-                        </div>
-                        <div class="plan-card">
-                            <div class="pc-num">05</div>
-                            <div class="pc-title">La Roadmap</div>
-                            <div class="pc-slides">Slide 12</div>
-                            <div class="pc-desc">Déploiement & Firebase</div>
-                        </div>
-                        <div class="plan-card" style="border-color:rgba(212,175,55,.3)">
-                            <div class="pc-num">06</div>
-                            <div class="pc-title">La Vision</div>
-                            <div class="pc-slides">Slide 13</div>
-                            <div class="pc-desc">Impact & perspectives</div>
-                        </div>
-                    </div>
-                </div>
-                <button class="speech-toggle" onclick="event.stopPropagation();toggleSpeech(this,'sp2')">Notes
-                    ↑</button>
-                <div class="speech-panel" id="sp2">
-                    <div class="sp-header"><span class="sp-label">Ce que tu dis</span><button class="sp-close"
-                            onclick="closeSp('sp2')">✕</button></div>
-                    <div class="sp-points">
-                        <div class="sp-point">
-                            <div class="sp-bullet">1</div>
-                            <div class="sp-text"><strong>Présenter le plan :</strong> "Je vais vous guider à travers six
-                                étapes : du problème que j'ai identifié jusqu'à la vision long terme. 13 slides. Je suis
-                                disponible pour vos questions à chaque étape."</div>
-                        </div>
-                        <div class="sp-divider"></div>
-                        <div class="sp-point">
-                            <div class="sp-bullet">!</div>
-                            <div class="sp-text"><strong>Ton :</strong> Slide rapide — 30 secondes. Donner les repères
-                                et passer à la suite.</div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- ═══════ S3 — PROBLÈME ═══════ -->
-            <div class="slide" id="s3" onclick="goTo(2)">
-                <div class="s3-glow"></div>
-                <div class="s3-glow2"></div>
-                <div class="s3-pad">
-                    <div class="kicker" style="color:var(--or)">01 · Le Contexte — Le Problème</div>
-                    <div class="big-stat">3<em> acteurs</em></div>
-                    <div class="big-lbl">ONG, bailleurs et bénéficiaires agissent séparément, sans plateforme commune,
-                        sans visibilité et sans coordination réelle.</div>
-                    <div class="s3-metrics">
-                        <div class="s3-m">
-                            <div class="s3-mn">120<em>+</em></div>
-                            <div class="s3-ml">ONG actives<br>en Afrique de l'Ouest</div>
-                        </div>
-                        <div class="s3-m">
-                            <div class="s3-mn">30<em>K</em></div>
-                            <div class="s3-ml">Bénéficiaires potentiels<br>sans accès aux programmes</div>
-                        </div>
-                        <div class="s3-m">
-                            <div class="s3-mn" style="color:var(--or)">0</div>
-                            <div class="s3-ml">Plateforme centralisée<br>pour tous les acteurs</div>
-                        </div>
-                    </div>
-                </div>
-                <button class="speech-toggle" onclick="event.stopPropagation();toggleSpeech(this,'sp3')">Notes
-                    ↑</button>
-                <div class="speech-panel" id="sp3">
-                    <div class="sp-header"><span class="sp-label">Ce que tu dis</span><button class="sp-close"
-                            onclick="closeSp('sp3')">✕</button></div>
-                    <div class="sp-points">
-                        <div class="sp-point">
-                            <div class="sp-bullet">1</div>
-                            <div class="sp-text"><strong>Le problème en chiffres :</strong> "3 acteurs qui s'ignorent.
-                                Des ONG sans visibilité. Des bailleurs sans canal fiable. Des bénéficiaires qui ne
-                                savent pas quels programmes existent près d'eux."</div>
-                        </div>
-                        <div class="sp-divider"></div>
-                        <div class="sp-point">
-                            <div class="sp-bullet">2</div>
-                            <div class="sp-text"><strong>Le paradoxe :</strong> "En 2025, il n'existe aucune plateforme
-                                centralisée dédiée à la mise en relation humanitaire en Afrique francophone. C'est
-                                précisément le vide que SocialLink comble."</div>
-                        </div>
-                        <div class="sp-divider"></div>
-                        <div class="sp-point">
-                            <div class="sp-bullet">3</div>
-                            <div class="sp-text"><strong>Transition :</strong> "Voyons comment SocialLink répond
-                                concrètement à ces trois problèmes."</div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- ═══════ S4 — SOLUTION ═══════ -->
-            <div class="slide" id="s4" onclick="goTo(3)">
-                <div class="s4-pad">
-                    <div class="kicker">01 · Le Contexte — La Solution</div>
-                    <div class="slide-title" style="color:#1A2340">SocialLink :<br>une plateforme, <em>quatre
-                            acteurs.</em></div>
-                    <div class="flow-steps">
-                        <div class="flow-step">
-                            <div class="fs-num">01</div>
-                            <div class="fs-title">ONG crée</div>
-                            <div class="fs-desc">Publie ses programmes humanitaires avec localisation, objectifs et
-                                besoins.</div>
-                        </div>
-                        <div class="flow-step">
-                            <div class="fs-num">02</div>
-                            <div class="fs-title">Bailleur donne</div>
-                            <div class="fs-desc">Fait un don en FCFA, suit son impact, et peut proposer son expertise.
-                            </div>
-                        </div>
-                        <div class="flow-step">
-                            <div class="fs-num">03</div>
-                            <div class="fs-title">Bénéficiaire trouve</div>
-                            <div class="fs-desc">Découvre les programmes disponibles près de chez lui et s'inscrit.
-                            </div>
-                        </div>
-                        <div class="flow-step">
-                            <div class="fs-num">04</div>
-                            <div class="fs-title">Admin supervise</div>
-                            <div class="fs-desc">Vue globale en lecture seule, interagit via la messagerie avec tous.
-                            </div>
-                        </div>
-                    </div>
-                    <div class="s4-tags">
-                        <div class="tag blue">Flutter Android</div>
-                        <div class="tag blue">Firebase Firestore</div>
-                        <div class="tag gold">Authentification 3 méthodes</div>
-                        <div class="tag gold">Messagerie temps réel</div>
-                        <div class="tag blue">OpenStreetMap gratuit</div>
-                        <div class="tag gold">Système de dons FCFA</div>
-                        <div class="tag blue">Notifications push FCM</div>
-                        <div class="tag">Niveaux de confiance ONG</div>
-                    </div>
-                </div>
-                <button class="speech-toggle" onclick="event.stopPropagation();toggleSpeech(this,'sp4')">Notes
-                    ↑</button>
-                <div class="speech-panel" id="sp4">
-                    <div class="sp-header"><span class="sp-label">Ce que tu dis</span><button class="sp-close"
-                            onclick="closeSp('sp4')">✕</button></div>
-                    <div class="sp-points">
-                        <div class="sp-point">
-                            <div class="sp-bullet">1</div>
-                            <div class="sp-text"><strong>Le flow :</strong> "SocialLink fonctionne en 4 mouvements. Une
-                                ONG publie son programme. Un bailleur le voit, fait un don. Un bénéficiaire s'inscrit.
-                                L'admin supervise tout."</div>
-                        </div>
-                        <div class="sp-divider"></div>
-                        <div class="sp-point">
-                            <div class="sp-bullet">2</div>
-                            <div class="sp-text"><strong>Sur la technologie :</strong> "Développée en Flutter — une
-                                seule base de code pour Android et le web. Firebase comme backend : zéro serveur à
-                                gérer, disponible 24h/24."</div>
-                        </div>
-                        <div class="sp-divider"></div>
-                        <div class="sp-point">
-                            <div class="sp-bullet">3</div>
-                            <div class="sp-text"><strong>Sur OpenStreetMap :</strong> "J'ai choisi OpenStreetMap à la
-                                place de Google Maps — 100% gratuit, pas de carte bancaire requise, et les données sont
-                                mises à jour par la communauté."</div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- ═══════ S5 — ROLES ═══════ -->
-            <div class="slide" id="s5" onclick="goTo(4)">
-                <div class="s5-pad">
-                    <div class="kicker">02 · Les Rôles</div>
-                    <div class="slide-title" style="color:#1A2340">Quatre profils,<br>des accès <em>strictement
-                            séparés.</em></div>
-                    <div class="slide-sub" style="color:var(--muted)">Chaque utilisateur n'accède qu'aux fonctionnalités
-                        de son rôle. La déconnexion est requise pour changer de profil.</div>
-                    <div class="roles-grid">
-                        <div class="role-card rc-ong">
-                            <span class="rc-icon"></span>
-                            <div class="rc-title">ONG</div>
-                            <div class="rc-items">
-                                Créer des programmes<br>
-                                Gérer les inscriptions<br>
-                                Confirmer les dons<br>
-                                Statistiques & rapports<br>
-                                Trouver des experts
-                            </div>
-                            <span class="rc-badge blue">Niveau de confiance</span>
-                        </div>
-                        <div class="role-card rc-bailleur">
-                            <span class="rc-icon"></span>
-                            <div class="rc-title">Bailleur / Expert</div>
-                            <div class="rc-items">
-                                Faire des dons FCFA<br>
-                                Historique des dons<br>
-                                Devenir personne ressource<br>
-                                Messagerie avec ONG<br>
-                                Voir la carte
-                            </div>
-                            <span class="rc-badge gold">Confirmation ONG requise</span>
-                        </div>
-                        <div class="role-card rc-benef">
-                            <span class="rc-icon"></span>
-                            <div class="rc-title">Bénéficiaire</div>
-                            <div class="rc-items">
-                                Voir les programmes<br>
-                                S'inscrire à un programme<br>
-                                Messagerie avec ONG<br>
-                                Carte interactive<br>
-                                Recherche & filtres
-                            </div>
-                            <span class="rc-badge green">Accès lecture seule invité</span>
-                        </div>
-                        <div class="role-card rc-admin">
-                            <span class="rc-icon"></span>
-                            <div class="rc-title">Administrateur</div>
-                            <div class="rc-items">
-                                Supervision complète<br>
-                                Statistiques globales<br>
-                                Voir tous les utilisateurs<br>
-                                Voir tous les dons<br>
-                                Messagerie uniquement
-                            </div>
-                            <span class="rc-badge dark">Lecture seule</span>
-                        </div>
-                    </div>
-                </div>
-                <button class="speech-toggle" onclick="event.stopPropagation();toggleSpeech(this,'sp5')">Notes
-                    ↑</button>
-                <div class="speech-panel" id="sp5">
-                    <div class="sp-header"><span class="sp-label">Ce que tu dis</span><button class="sp-close"
-                            onclick="closeSp('sp5')">✕</button></div>
-                    <div class="sp-points">
-                        <div class="sp-point">
-                            <div class="sp-bullet">1</div>
-                            <div class="sp-text"><strong>La séparation des rôles :</strong> "Un point important de
-                                sécurité : chaque rôle est strictement isolé. Un bénéficiaire ne peut pas accéder au
-                                tableau de bord ONG. Un bailleur ne voit pas les données admin. C'est géré au niveau de
-                                Firebase Firestore."</div>
-                        </div>
-                        <div class="sp-divider"></div>
-                        <div class="sp-point">
-                            <div class="sp-bullet">2</div>
-                            <div class="sp-text"><strong>Sur l'admin :</strong> "L'administrateur a une vue globale —
-                                mais il ne peut rien modifier. Il peut seulement lire et utiliser la messagerie. C'est
-                                un rôle de supervision, pas de gestion."</div>
-                        </div>
-                        <div class="sp-divider"></div>
-                        <div class="sp-point">
-                            <div class="sp-bullet">3</div>
-                            <div class="sp-text"><strong>Sur les invités :</strong> "Un visiteur non connecté peut
-                                consulter les programmes et la carte — mais toute action redirige vers l'inscription."
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- ═══════ S6 — FONCTIONNALITES ═══════ -->
-            <div class="slide" id="s6" onclick="goTo(5)">
-                <div class="s6-pad">
-                    <div class="kicker" style="color:rgba(255,255,255,.5)">02 · Les Rôles — Fonctionnalités</div>
-                    <div class="slide-title" style="color:#fff">12 fonctionnalités<br>pour un <em>impact complet.</em>
-                    </div>
-                    <div class="feat-grid">
-                        <div class="feat-card"><span class="feat-icon"></span>
-                            <div class="feat-title">Authentification triple</div>
-                            <div class="feat-desc">Email, Google Sign-In et SMS avec code OTP. Sécurité Firebase Auth.
-                            </div><span class="feat-tag">FIREBASE AUTH</span>
-                        </div>
-                        <div class="feat-card"><span class="feat-icon"></span>
-                            <div class="feat-title">Messagerie temps réel</div>
-                            <div class="feat-desc">Texte, images et fichiers entre tous les acteurs. Badges non lus.
-                            </div><span class="feat-tag">FIRESTORE STREAMS</span>
-                        </div>
-                        <div class="feat-card"><span class="feat-icon"></span>
-                            <div class="feat-title">Système de dons FCFA</div>
-                            <div class="feat-desc">Dons en attente jusqu'à confirmation ONG. Message automatique envoyé.
-                            </div><span class="feat-tag">VALIDATION ONG</span>
-                        </div>
-                        <div class="feat-card"><span class="feat-icon"></span>
-                            <div class="feat-title">Carte interactive</div>
-                            <div class="feat-desc">OpenStreetMap. Géolocalisation, filtres par catégorie, markers dorés.
-                            </div><span class="feat-tag">OPENSTREETMAP</span>
-                        </div>
-                        <div class="feat-card"><span class="feat-icon"></span>
-                            <div class="feat-title">Recherche avancée</div>
-                            <div class="feat-desc">Filtres par catégorie, spécialité et localisation pour programmes et
-                                experts.</div><span class="feat-tag">FIRESTORE QUERY</span>
-                        </div>
-                        <div class="feat-card"><span class="feat-icon"></span>
-                            <div class="feat-title">Notifications push</div>
-                            <div class="feat-desc">Firebase Cloud Messaging. Notification au bailleur lors de la
-                                confirmation.</div><span class="feat-tag">FIREBASE FCM</span>
-                        </div>
-                        <div class="feat-card"><span class="feat-icon"></span>
-                            <div class="feat-title">Statistiques ONG</div>
-                            <div class="feat-desc">Tableau de bord avec programmes, bénéficiaires, fonds collectés et
-                                progression.</div><span class="feat-tag">DASHBOARD</span>
-                        </div>
-                        <div class="feat-card"><span class="feat-icon"></span>
-                            <div class="feat-title">Niveaux de confiance</div>
-                            <div class="feat-desc">Bronze, Argent, Or, Platine selon les performances de l'ONG. Badge
-                                visible.</div><span class="feat-tag">GAMIFICATION</span>
-                        </div>
-                        <div class="feat-card"><span class="feat-icon"></span>
-                            <div class="feat-title">Personnes ressources</div>
-                            <div class="feat-desc">Experts bénévoles ou rémunérés : médecins, juristes, formateurs...
-                            </div><span class="feat-tag">PROFIL EXPERT</span>
-                        </div>
-                    </div>
-                </div>
-                <button class="speech-toggle" onclick="event.stopPropagation();toggleSpeech(this,'sp6')">Notes
-                    ↑</button>
-                <div class="speech-panel" id="sp6">
-                    <div class="sp-header"><span class="sp-label">Ce que tu dis</span><button class="sp-close"
-                            onclick="closeSp('sp6')">✕</button></div>
-                    <div class="sp-points">
-                        <div class="sp-point">
-                            <div class="sp-bullet">1</div>
-                            <div class="sp-text"><strong>Survoler les 9 fonctions :</strong> "L'application comporte 12
-                                fonctionnalités majeures. Je vais en détailler quelques-unes dans les slides suivantes —
-                                les plus importantes techniquement."</div>
-                        </div>
-                        <div class="sp-divider"></div>
-                        <div class="sp-point">
-                            <div class="sp-bullet">2</div>
-                            <div class="sp-text"><strong>Sur la gamification :</strong> "J'ai ajouté un système de
-                                niveaux de confiance pour les ONG — Bronze, Argent, Or, Platine — calculé
-                                automatiquement selon le nombre de programmes et de bénéficiaires. Ça crée une émulation
-                                positive."</div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- ═══════ S7 — ARCHITECTURE ═══════ -->
-            <div class="slide" id="s7" onclick="goTo(6)">
-                <div class="s7-pad">
-                    <div class="kicker">03 · Architecture Technique</div>
-                    <div class="slide-title" style="color:#1A2340">Une seule base de code,<br>un <em>écosystème
-                            complet.</em></div>
-                    <div class="tech-grid">
-                        <div class="tech-card">
-                            <div class="tech-icon ti-blue"></div>
-                            <div>
-                                <div class="tech-name">Flutter (Dart)</div>
-                                <div class="tech-desc">Framework cross-platform. Une base de code unique pour Android et
-                                    Flutter Web. Style Luxury Noir & Bleu & Or, animations au scroll.</div>
-                            </div>
-                        </div>
-                        <div class="tech-card">
-                            <div class="tech-icon ti-gold"></div>
-                            <div>
-                                <div class="tech-name">Firebase Firestore</div>
-                                <div class="tech-desc">Base de données NoSQL temps réel. Streams pour messagerie et
-                                    dons. Règles de sécurité strictes par rôle.</div>
-                            </div>
-                        </div>
-                        <div class="tech-card">
-                            <div class="tech-icon ti-blue"></div>
-                            <div>
-                                <div class="tech-name">Firebase Auth</div>
-                                <div class="tech-desc">Authentification email, Google Sign-In et SMS (OTP). Redirection
-                                    automatique selon le rôle Firestore.</div>
-                            </div>
-                        </div>
-                        <div class="tech-card">
-                            <div class="tech-icon ti-gold"></div>
-                            <div>
-                                <div class="tech-name">OpenStreetMap</div>
-                                <div class="tech-desc">Cartographie 100% gratuite via flutter_map + latlong2.
-                                    Géolocalisation avec geolocator. Zéro carte bancaire.</div>
-                            </div>
-                        </div>
-                        <div class="tech-card">
-                            <div class="tech-icon ti-green"></div>
-                            <div>
-                                <div class="tech-name">Firebase Storage</div>
-                                <div class="tech-desc">Stockage des images et fichiers de la messagerie. Règles de
-                                    sécurité : 10 MB max par fichier.</div>
-                            </div>
-                        </div>
-                        <div class="tech-card">
-                            <div class="tech-icon ti-dark"></div>
-                            <div>
-                                <div class="tech-name">Firebase Hosting</div>
-                                <div class="tech-desc">Déploiement Flutter Web + Landing page React. URL publique HTTPS.
-                                    PWA installable sur mobile.</div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="tech-stack">
-                        <div class="ts-label">Packages Flutter principaux</div>
-                        <div class="ts-tag">firebase_core</div>
-                        <div class="ts-tag">firebase_auth</div>
-                        <div class="ts-tag">cloud_firestore</div>
-                        <div class="ts-tag">firebase_storage</div>
-                        <div class="ts-tag">firebase_messaging</div>
-                        <div class="ts-tag">flutter_map</div>
-                        <div class="ts-tag">image_picker</div>
-                        <div class="ts-tag">file_picker</div>
-                        <div class="ts-tag">intl</div>
-                        <div class="ts-tag">cached_network_image</div>
-                    </div>
-                </div>
-                <button class="speech-toggle" onclick="event.stopPropagation();toggleSpeech(this,'sp7')">Notes
-                    ↑</button>
-                <div class="speech-panel" id="sp7">
-                    <div class="sp-header"><span class="sp-label">Ce que tu dis</span><button class="sp-close"
-                            onclick="closeSp('sp7')">✕</button></div>
-                    <div class="sp-points">
-                        <div class="sp-point">
-                            <div class="sp-bullet">1</div>
-                            <div class="sp-text"><strong>Sur Flutter :</strong> "J'ai choisi Flutter pour une raison
-                                précise : une seule base de code en Dart génère à la fois l'APK Android et le site web.
-                                Deux livrables, un seul travail."</div>
-                        </div>
-                        <div class="sp-divider"></div>
-                        <div class="sp-point">
-                            <div class="sp-bullet">2</div>
-                            <div class="sp-text"><strong>Sur Firebase :</strong> "Firebase joue le rôle de backend
-                                complet — base de données, authentification, stockage, notifications. Zéro serveur à
-                                configurer, disponible mondialement."</div>
-                        </div>
-                        <div class="sp-divider"></div>
-                        <div class="sp-point">
-                            <div class="sp-bullet">3</div>
-                            <div class="sp-text"><strong>Sur OpenStreetMap :</strong> "Google Maps exige une carte
-                                bancaire pour l'API. J'ai opté pour OpenStreetMap — 100% gratuit, open source, et
-                                suffisamment précis pour l'Afrique de l'Ouest."</div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- ═══════ S8 — NIVEAUX CONFIANCE ═══════ -->
-            <div class="slide" id="s8" onclick="goTo(7)">
-                <div class="s8-pad">
-                    <div class="kicker" style="color:rgba(255,255,255,.5)">04 · Fonctions Clés — Niveaux de Confiance
-                    </div>
-                    <div class="slide-title" style="color:#fff">La confiance se <em>gagne.</em><br>Elle se voit.</div>
-                    <div
-                        style="font-size:14px;color:rgba(255,255,255,.4);max-width:600px;line-height:1.7;margin-top:10px;margin-bottom:28px">
-                        Calculé automatiquement selon les performances de l'ONG. Visible par tous les visiteurs sur les
-                        programmes et les profils.</div>
-                    <div class="levels-wrap">
-                        <div class="level-card lc-bronze">
-                            <span class="lc-emoji">🥉</span>
-                            <div class="lc-name">Bronze</div>
-                            <div class="lc-req">1 programme créé<br>Premiers pas sur la plateforme</div>
-                            <div class="lc-bar"></div>
-                        </div>
-                        <div class="level-card lc-silver">
-                            <span class="lc-emoji">🥈</span>
-                            <div class="lc-name">Argent</div>
-                            <div class="lc-req">3+ programmes<br>5+ bénéficiaires inscrits</div>
-                            <div class="lc-bar"></div>
-                        </div>
-                        <div class="level-card lc-gold">
-                            <span class="lc-emoji">🥇</span>
-                            <div class="lc-name">Or</div>
-                            <div class="lc-req">10+ programmes<br>50+ bénéficiaires</div>
-                            <div class="lc-bar"></div>
-                        </div>
-                        <div class="level-card lc-plat">
-                            <span class="lc-emoji">💎</span>
-                            <div class="lc-name">Platine</div>
-                            <div class="lc-req">20+ programmes<br>200+ bénéficiaires</div>
-                            <div class="lc-bar"></div>
-                        </div>
-                    </div>
-                    <div class="s8-note">Le badge est affiché sur chaque programme publié par l'ONG — <em>visible par
-                            les bailleurs et bénéficiaires</em> pour renforcer la crédibilité et encourager les dons
-                        vers les ONG les plus actives.</div>
-                </div>
-                <button class="speech-toggle" onclick="event.stopPropagation();toggleSpeech(this,'sp8')">Notes
-                    ↑</button>
-                <div class="speech-panel" id="sp8">
-                    <div class="sp-header"><span class="sp-label">Ce que tu dis</span><button class="sp-close"
-                            onclick="closeSp('sp8')">✕</button></div>
-                    <div class="sp-points">
-                        <div class="sp-point">
-                            <div class="sp-bullet">1</div>
-                            <div class="sp-text"><strong>L'idée :</strong> "J'ai voulu gamifier l'engagement des ONG.
-                                Plus une ONG est active — plus elle crée de programmes, plus elle touche de
-                                bénéficiaires — plus son niveau monte. C'est visible par tous."</div>
-                        </div>
-                        <div class="sp-divider"></div>
-                        <div class="sp-point">
-                            <div class="sp-bullet">2</div>
-                            <div class="sp-text"><strong>L'impact :</strong> "Un bailleur qui voit une ONG Platine sait
-                                qu'elle est sérieuse, active et efficace. Ça crée une confiance numérique — comme les
-                                étoiles sur Airbnb."</div>
-                        </div>
-                        <div class="sp-divider"></div>
-                        <div class="sp-point">
-                            <div class="sp-bullet">3</div>
-                            <div class="sp-text"><strong>Techniquement :</strong> "C'est calculé côté client en Dart à
-                                partir des données Firestore en temps réel. Aucun calcul serveur nécessaire."</div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- ═══════ S9 — SYSTEME DONS ═══════ -->
-            <div class="slide" id="s9" onclick="goTo(8)">
-                <div class="s9-pad">
-                    <div class="kicker">04 · Fonctions Clés — Système de Dons</div>
-                    <div class="slide-title" style="color:#1A2340">Un don transparent,<br><em>validé avant</em> d'être
-                        comptabilisé.</div>
-                    <div class="msg-flow">
-                        <div class="msg-step ms1">
-                            <span class="ms-icon"></span>
-                            <div class="ms-title">Bailleur fait un don</div>
-                            <div class="ms-desc">Choisit un montant en FCFA (prédefini ou libre), sélectionne la méthode
-                                de paiement (Mobile Money, carte, virement). Statut : EN ATTENTE.</div>
-                            <span class="ms-tag">STATUS: PENDING</span>
-                        </div>
-                        <div class="msg-step ms2">
-                            <span class="ms-icon"></span>
-                            <div class="ms-title">Message automatique</div>
-                            <div class="ms-desc">Un message est envoyé automatiquement à l'ONG dans la messagerie :
-                                montant, programme concerné, message du bailleur.</div>
-                            <span class="ms-tag">CHAT AUTO-CRÉÉ</span>
-                        </div>
-                        <div class="msg-step ms3">
-                            <span class="ms-icon"></span>
-                            <div class="ms-title">ONG confirme</div>
-                            <div class="ms-desc">L'ONG voit le don dans son tableau de bord et clique CONFIRMER. Le
-                                montant est alors ajouté au programme. Message de confirmation envoyé au bailleur.</div>
-                            <span class="ms-tag">STATUS: CONFIRMED</span>
-                        </div>
-                    </div>
-                    <div class="s9-don">
-                        <div class="s9-don-icon"></div>
-                        <div class="s9-don-text">
-                            <div class="s9-don-title">Tant que le don n'est pas confirmé par l'ONG...</div>
-                            <div class="s9-don-desc">Le montant n'est pas ajouté au programme. L'historique du bailleur
-                                ne comptabilise que les dons confirmés. Transparence totale.</div>
-                        </div>
-                        <div class="s9-don-badge">VALIDATION ONG</div>
-                    </div>
-                </div>
-                <button class="speech-toggle" onclick="event.stopPropagation();toggleSpeech(this,'sp9')">Notes
-                    ↑</button>
-                <div class="speech-panel" id="sp9">
-                    <div class="sp-header"><span class="sp-label">Ce que tu dis</span><button class="sp-close"
-                            onclick="closeSp('sp9')">✕</button></div>
-                    <div class="sp-points">
-                        <div class="sp-point">
-                            <div class="sp-bullet">1</div>
-                            <div class="sp-text"><strong>Le problème que ça résout :</strong> "Dans beaucoup de
-                                plateformes, le don est affiché immédiatement même si l'ONG ne l'a pas reçu. J'ai voulu
-                                éviter ça. Ici, le don est EN ATTENTE jusqu'à confirmation explicite de l'ONG."</div>
-                        </div>
-                        <div class="sp-divider"></div>
-                        <div class="sp-point">
-                            <div class="sp-bullet">2</div>
-                            <div class="sp-text"><strong>Techniquement :</strong> "J'utilise un batch Firestore : le don
-                                est créé avec status 'pending', et un message automatique est envoyé dans le chat
-                                ONG-Bailleur. Quand l'ONG confirme, le batch met à jour le statut ET incrémente
-                                raisedAmount du programme en une seule transaction atomique."</div>
-                        </div>
-                        <div class="sp-divider"></div>
-                        <div class="sp-point">
-                            <div class="sp-bullet">3</div>
-                            <div class="sp-text"><strong>L'UX bailleur :</strong> "Le bailleur reçoit une notification
-                                push quand son don est confirmé. Et l'historique de ses dons ne montre que les montants
-                                réellement validés."</div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- ═══════ S10 — CARTE ═══════ -->
-            <div class="slide" id="s10" onclick="goTo(9)">
-                <div class="s10-pad">
-                    <div class="kicker" style="color:rgba(255,255,255,.5)">04 · Fonctions Clés — Carte Interactive</div>
-                    <div class="slide-title" style="color:#fff">Localiser les ONG<br>et programmes<br><em>sans
-                            frais.</em></div>
-                    <div class="map-features">
-                        <div class="mf-card">
-                            <div class="mf-icon"></div>
-                            <div>
-                                <div class="mf-title">Markers ONG & Programmes</div>
-                                <div class="mf-desc">Chaque programme avec coordonnées GPS apparaît sur la carte. Clic →
-                                    fiche détail.</div>
-                            </div>
-                        </div>
-                        <div class="mf-card">
-                            <div class="mf-icon"></div>
-                            <div>
-                                <div class="mf-title">Géolocalisation utilisateur</div>
-                                <div class="mf-desc">Le marker bleu indique la position de l'utilisateur. Centrage
-                                    automatique.</div>
-                            </div>
-                        </div>
-                        <div class="mf-card">
-                            <div class="mf-icon"></div>
-                            <div>
-                                <div class="mf-title">Filtres par catégorie</div>
-                                <div class="mf-desc">Alimentation, Santé, Éducation, Eau, Formation — filtrage des
-                                    markers en temps réel.</div>
-                            </div>
-                        </div>
-                        <div class="mf-card">
-                            <div class="mf-icon"></div>
-                            <div>
-                                <div class="mf-title">Style sombre personnalisé</div>
-                                <div class="mf-desc">Tuiles OpenStreetMap avec style JSON dark pour cohérence avec
-                                    l'interface.</div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="s10-osm">
-                        <span style="font-size:24px"></span>
-                        <div>Technologie : <em>flutter_map + latlong2 + geolocator</em> — 100% open source, zéro coût,
-                            zéro carte bancaire. Google Maps aurait coûté jusqu'à 200$ / mois au-delà du quota gratuit.
-                        </div>
-                    </div>
-                </div>
-                <button class="speech-toggle" onclick="event.stopPropagation();toggleSpeech(this,'sp10')">Notes
-                    ↑</button>
-                <div class="speech-panel" id="sp10">
-                    <div class="sp-header"><span class="sp-label">Ce que tu dis</span><button class="sp-close"
-                            onclick="closeSp('sp10')">✕</button></div>
-                    <div class="sp-points">
-                        <div class="sp-point">
-                            <div class="sp-bullet">1</div>
-                            <div class="sp-text"><strong>Le choix technique :</strong> "Google Maps SDK pour Android est
-                                gratuit jusqu'à un quota, puis facturable. J'ai choisi OpenStreetMap via le package
-                                flutter_map — entièrement gratuit, pas de quota, pas de clé API bancaire."</div>
-                        </div>
-                        <div class="sp-divider"></div>
-                        <div class="sp-point">
-                            <div class="sp-bullet">2</div>
-                            <div class="sp-text"><strong>Le style :</strong> "J'ai personnalisé le style de la carte en
-                                JSON pour qu'elle soit cohérente avec le thème noir et or de l'application."</div>
-                        </div>
-                        <div class="sp-divider"></div>
-                        <div class="sp-point">
-                            <div class="sp-bullet">3</div>
-                            <div class="sp-text"><strong>Les filtres :</strong> "Les markers se filtrent en temps réel
-                                selon la catégorie du programme — Alimentation, Santé, Éducation — sans rechargement de
-                                page."</div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- ═══════ S11 — ADMIN ═══════ -->
-            <div class="slide" id="s11" onclick="goTo(10)">
-                <div class="s11-pad">
-                    <div class="kicker">04 · Fonctions Clés — Supervision Admin</div>
-                    <div class="slide-title" style="color:#1A2340">Tout voir.<br>Ne rien <em>modifier.</em></div>
-                    <div
-                        style="font-size:14px;color:var(--muted);max-width:600px;line-height:1.7;margin-top:10px;margin-bottom:28px">
-                        L'administrateur dispose d'une vue complète en lecture seule de toute la plateforme. Son seul
-                        pouvoir d'action : la messagerie.</div>
-                    <div class="admin-grid">
-                        <div class="admin-card">
-                            <div class="ac-icon"></div>
-                            <div class="ac-title">Tous les utilisateurs</div>
-                            <div class="ac-desc">Liste filtrée par rôle, statut, date d'inscription. Peut contacter via
-                                messagerie.</div><span class="ac-note">LECTURE SEULE</span>
-                        </div>
-                        <div class="admin-card">
-                            <div class="ac-icon"></div>
-                            <div class="ac-title">Tous les programmes</div>
-                            <div class="ac-desc">Vue globale des programmes actifs, en attente et rejetés. Statistiques
-                                d'inscription.</div><span class="ac-note">LECTURE SEULE</span>
-                        </div>
-                        <div class="admin-card">
-                            <div class="ac-icon"></div>
-                            <div class="ac-title">Tous les dons</div>
-                            <div class="ac-desc">Historique complet avec statuts (pending, confirmed, rejected). Total
-                                FCFA collecté.</div><span class="ac-note">LECTURE SEULE</span>
-                        </div>
-                        <div class="admin-card">
-                            <div class="ac-icon"></div>
-                            <div class="ac-title">Statistiques globales</div>
-                            <div class="ac-desc">Nombre total d'utilisateurs, programmes, dons, experts, montant total
-                                confirmé.</div><span class="ac-note">TEMPS RÉEL</span>
-                        </div>
-                    </div>
-                </div>
-                <button class="speech-toggle" onclick="event.stopPropagation();toggleSpeech(this,'sp11')">Notes
-                    ↑</button>
-                <div class="speech-panel" id="sp11">
-                    <div class="sp-header"><span class="sp-label">Ce que tu dis</span><button class="sp-close"
-                            onclick="closeSp('sp11')">✕</button></div>
-                    <div class="sp-points">
-                        <div class="sp-point">
-                            <div class="sp-bullet">1</div>
-                            <div class="sp-text"><strong>Le principe :</strong> "J'ai volontairement limité les pouvoirs
-                                de l'admin. Il voit tout, mais ne peut rien modifier. Sa seule capacité d'action : la
-                                messagerie pour contacter n'importe quel utilisateur."</div>
-                        </div>
-                        <div class="sp-divider"></div>
-                        <div class="sp-point">
-                            <div class="sp-bullet">2</div>
-                            <div class="sp-text"><strong>Pourquoi ce choix :</strong> "Un admin qui peut tout modifier
-                                est un risque. Un admin qui supervise et communique est un outil de qualité. C'est un
-                                choix délibéré de conception."</div>
-                        </div>
-                        <div class="sp-divider"></div>
-                        <div class="sp-point">
-                            <div class="sp-bullet">3</div>
-                            <div class="sp-text"><strong>Techniquement :</strong> "Le rôle admin est stocké dans
-                                Firestore. Les règles de sécurité Firebase vérifient le rôle avant chaque lecture. Il
-                                est impossible de contourner ça côté client."</div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- ═══════ S12 — ROADMAP ═══════ -->
-            <div class="slide" id="s12" onclick="goTo(11)">
-                <div class="s12-pad">
-                    <div class="kicker" style="color:rgba(255,255,255,.5)">05 · La Roadmap — Déploiement</div>
-                    <div class="slide-title" style="color:#fff">Du développement<br>au <em>Play Store.</em></div>
-                    <div style="height:28px"></div>
-                    <div class="roadmap-track">
-                        <div class="rm-line"></div>
-                        <div class="rm-phase">
-                            <div class="rm-dot on"></div>
-                            <div class="rm-period">PHASE 1</div>
-                            <div class="rm-title">Architecture</div>
-                            <div class="rm-pts">Flutter + Firebase<br>Auth + Firestore<br>3 rôles</div>
-                            <div class="rm-badge">✅ Fait</div>
-                        </div>
-                        <div class="rm-phase">
-                            <div class="rm-dot on"></div>
-                            <div class="rm-period">PHASE 2</div>
-                            <div class="rm-title">UI & Fonctions</div>
-                            <div class="rm-pts">Style Noir & Or<br>Messagerie<br>Carte OSM</div>
-                            <div class="rm-badge">✅ Fait</div>
-                        </div>
-                        <div class="rm-phase">
-                            <div class="rm-dot on"></div>
-                            <div class="rm-period">PHASE 3</div>
-                            <div class="rm-title">Avancé</div>
-                            <div class="rm-pts">Dons + validation<br>Admin<br>Niveaux confiance</div>
-                            <div class="rm-badge">✅ Fait</div>
-                        </div>
-                        <div class="rm-phase">
-                            <div class="rm-dot"></div>
-                            <div class="rm-period">PHASE 4</div>
-                            <div class="rm-title">Déploiement</div>
-                            <div class="rm-pts">APK release<br>Firebase Hosting<br>Landing page</div>
-                            <div class="rm-badge" style="opacity:.5">En cours</div>
-                        </div>
-                        <div class="rm-phase">
-                            <div class="rm-dot"></div>
-                            <div class="rm-period">PHASE 5</div>
-                            <div class="rm-title">Play Store</div>
-                            <div class="rm-pts">Compte développeur<br>AAB signé<br>Publication</div>
-                            <div class="rm-badge" style="opacity:.5">À venir</div>
-                        </div>
-                    </div>
-                    <div class="firebase-strip"><strong>Firebase Hosting déployé :</strong> L'application Flutter Web et
-                        la landing page React sont accessibles publiquement via Firebase Hosting. L'APK Android est
-                        téléchargeable depuis la landing page. PWA installable sur mobile via le navigateur.</div>
-                </div>
-                <button class="speech-toggle" onclick="event.stopPropagation();toggleSpeech(this,'sp12')">Notes
-                    ↑</button>
-                <div class="speech-panel" id="sp12">
-                    <div class="sp-header"><span class="sp-label">Ce que tu dis</span><button class="sp-close"
-                            onclick="closeSp('sp12')">✕</button></div>
-                    <div class="sp-points">
-                        <div class="sp-point">
-                            <div class="sp-bullet">1</div>
-                            <div class="sp-text"><strong>Les 3 phases faites :</strong> "Les trois premières phases sont
-                                complètes. Architecture, interface, fonctionnalités avancées — tout est développé et
-                                fonctionnel."</div>
-                        </div>
-                        <div class="sp-divider"></div>
-                        <div class="sp-point">
-                            <div class="sp-bullet">2</div>
-                            <div class="sp-text"><strong>Sur le déploiement :</strong> "La phase 4 est en cours. L'APK
-                                est généré et testable. Firebase Hosting est configuré. La landing page React est prête
-                                avec le bouton de téléchargement."</div>
-                        </div>
-                        <div class="sp-divider"></div>
-                        <div class="sp-point">
-                            <div class="sp-bullet">3</div>
-                            <div class="sp-text"><strong>Sur le Play Store :</strong> "La phase 5 nécessite un compte
-                                Google Play Developer à 25$. L'AAB signé est généré. La publication est prévue dans les
-                                prochaines semaines."</div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- ═══════ S13 — VISION ═══════ -->
-            <div class="slide" id="s13" onclick="goTo(12)">
-                <div class="s13-bg"></div>
-                <div class="s13-pad">
-                    <div class="s13-eyebrow">06 · La Vision</div>
-                    <div class="s13-title">SocialLink, c'est la<br><em>plateforme de référence</em><br>de
-                        l'humanitaire<br>en Afrique de l'Ouest.</div>
-                    <div class="s13-stats">
-                        <div class="s13-stat">
-                            <div class="s13-stat-n">120+</div>
-                            <div class="s13-stat-l">ONG cibles</div>
-                        </div>
-                        <div class="s13-stat">
-                            <div class="s13-stat-n">5K+</div>
-                            <div class="s13-stat-l">Bailleurs</div>
-                        </div>
-                        <div class="s13-stat">
-                            <div class="s13-stat-n">30K+</div>
-                            <div class="s13-stat-l">Bénéficiaires</div>
-                        </div>
-                        <div class="s13-stat">
-                            <div class="s13-stat-n">15+</div>
-                            <div class="s13-stat-l">Pays couverts</div>
-                        </div>
-                    </div>
-                    <div class="s13-sub">Connecter les acteurs humanitaires n'est pas un projet académique. C'est un
-                        besoin réel. SocialLink est la réponse technique et humaine à ce besoin.</div>
-                    <div class="s13-tagline">Plateforme Humanitaire Mobile · Flutter · Firebase</div>
-                    <div class="s13-logo">SOCIALLINK</div>
-                    <div style="margin-top:14px;font-size:10px;color:rgba(255,255,255,.2);letter-spacing:3px">COTONOU ·
-                        BÉNIN · 2025</div>
-                </div>
-                <button class="speech-toggle" onclick="event.stopPropagation();toggleSpeech(this,'sp13')">Notes
-                    ↑</button>
-                <div class="speech-panel" id="sp13">
-                    <div class="sp-header"><span class="sp-label">Ce que tu dis</span><button class="sp-close"
-                            onclick="closeSp('sp13')">✕</button></div>
-                    <div class="sp-points">
-                        <div class="sp-point">
-                            <div class="sp-bullet">1</div>
-                            <div class="sp-text"><strong>La vision :</strong> "SocialLink n'est pas qu'un projet de
-                                soutenance. C'est une réponse à un problème réel que je vois autour de moi — des ONG qui
-                                peinent à trouver des financements, des gens qui veulent aider mais ne savent pas
-                                comment."</div>
-                        </div>
-                        <div class="sp-divider"></div>
-                        <div class="sp-point">
-                            <div class="sp-bullet">2</div>
-                            <div class="sp-text"><strong>Ce que j'ai appris :</strong> "Ce projet m'a permis de
-                                maîtriser Flutter, Firebase, l'architecture multi-rôles, les streams temps réel, la
-                                sécurité Firestore, les animations Flutter, et le déploiement mobile."</div>
-                        </div>
-                        <div class="sp-divider"></div>
-                        <div class="sp-point">
-                            <div class="sp-bullet">3</div>
-                            <div class="sp-text"><strong>La clôture :</strong> "Ensemble pour un impact réel. Je vous
-                                remercie pour votre attention et suis disponible pour vos questions." <em>→ Silence.
-                                    Sourire. Regard sur le jury.</em></div>
-                        </div>
-                        <div class="sp-divider"></div>
-                        <div class="sp-point">
-                            <div class="sp-bullet">!</div>
-                            <div class="sp-text"><strong>Ton :</strong> Lent, posé, convaincu. Ne cours pas sur ce
-                                dernier slide. C'est ta conclusion — laisse-la exister.</div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-        </div><!-- /world -->
-    </div><!-- /stage -->
-
-    <div id="hud">
-        <button class="hbtn" onclick="prev()">←</button>
-        <div id="dots"></div>
-        <span id="counter">1 / 13</span>
-        <button class="hbtn" onclick="next()">→</button>
+<!-- ═══════ S1 — COVER ═══════ -->
+<div class="slide" id="s1" onclick="goTo(0)">
+  <div class="s1-bg"></div><div class="s1-bg2"></div>
+  <div class="s1-deco1"></div><div class="s1-deco2"></div><div class="s1-deco3"></div>
+  <div class="s1-split">
+    <div class="s1-left">
+      <div>
+        <div class="s1-eyebrow">Présentation · Soutenance 2025</div>
+        <div class="s1-title">Social<em>Link</em></div>
+        <div style="width:70px;height:2px;background:linear-gradient(90deg,#1565C0,#D4AF37);border-radius:2px;margin:16px 0 20px"></div>
+        <div class="s1-sub">La plateforme humanitaire qui connecte les ONG, les bailleurs de fonds, les personnes ressources et les bénéficiaires pour un impact réel en Afrique de l'Ouest.</div>
+      </div>
+      <div class="s1-meta">Développement Web & Mobile · Flutter · Firebase · Cotonou, Bénin</div>
     </div>
+    <div class="s1-right">
+      <div class="s1-stat">
+        <div class="s1-stat-n">4<em> rôles</em></div>
+        <div class="s1-stat-l">ONG · Bailleur<br>Bénéficiaire · Admin</div>
+      </div>
+      <div class="s1-stat">
+        <div class="s1-stat-n">12<em>+</em></div>
+        <div class="s1-stat-l">Fonctionnalités<br>développées</div>
+      </div>
+      <div class="s1-stat">
+        <div class="s1-stat-n">1<em> app</em></div>
+        <div class="s1-stat-l">Mobile + Web<br>Firebase Backend</div>
+      </div>
+    </div>
+  </div>
+  <div class="s1-badge">🌍 Flutter · Firebase · OpenStreetMap</div>
+  <button class="speech-toggle" onclick="event.stopPropagation();toggleSpeech(this,'sp1')">Notes ↑</button>
+  <div class="speech-panel" id="sp1">
+    <div class="sp-header"><span class="sp-label">Ce que tu dis</span><button class="sp-close" onclick="closeSp('sp1')">✕</button></div>
+    <div class="sp-points">
+      <div class="sp-point"><div class="sp-bullet">1</div><div class="sp-text"><strong>L'accroche :</strong> "Bonjour. SocialLink est né d'un constat simple : en Afrique de l'Ouest, des centaines d'ONG agissent sur le terrain, mais peinent à trouver des financements. Des milliers de bailleurs souhaitent aider, mais ne savent pas où donner. Et les bénéficiaires n'ont aucun moyen de connaître les programmes disponibles près d'eux."</div></div>
+      <div class="sp-divider"></div>
+      <div class="sp-point"><div class="sp-bullet">2</div><div class="sp-text"><strong>La solution en une phrase :</strong> "SocialLink est la plateforme qui connecte tous ces acteurs en un seul endroit — mobile, simple, et accessible."</div></div>
+      <div class="sp-divider"></div>
+      <div class="sp-point"><div class="sp-bullet">3</div><div class="sp-text"><strong>Les technologies :</strong> "Développée avec Flutter pour Android, Firebase comme backend cloud, et OpenStreetMap pour la cartographie — sans aucun frais de carte bancaire."</div></div>
+    </div>
+  </div>
+</div>
 
-    <script>
-        const slides = [
-            { id: 's1', x: 300, y: 200, w: 1440, h: 900 },
-            { id: 's2', x: 2060, y: 180, w: 1200, h: 780 },
-            { id: 's3', x: 3560, y: 140, w: 1320, h: 820 },
-            { id: 's4', x: 5200, y: 160, w: 1300, h: 820 },
-            { id: 's5', x: 300, y: 1440, w: 1320, h: 820 },
-            { id: 's6', x: 1940, y: 1440, w: 1300, h: 820 },
-            { id: 's7', x: 3480, y: 1420, w: 1320, h: 820 },
-            { id: 's8', x: 5200, y: 1440, w: 1300, h: 840 },
-            { id: 's9', x: 680, y: 2780, w: 1260, h: 800 },
-            { id: 's10', x: 2240, y: 2820, w: 1200, h: 760 },
-            { id: 's11', x: 3740, y: 2800, w: 1200, h: 760 },
-            { id: 's12', x: 5240, y: 2780, w: 1420, h: 800 },
-            { id: 's13', x: 5500, y: 120, w: 1320, h: 860 },
-        ];
+<!-- ═══════ S2 — PLAN ═══════ -->
+<div class="slide" id="s2" onclick="goTo(1)">
+  <div class="s2-pad">
+    <div class="kicker">Plan de présentation</div>
+    <div class="slide-title">Notre cheminement<br>en six temps.</div>
+    <div class="slide-sub">13 slides pour présenter SocialLink de la problématique à la démonstration technique.</div>
+    <div class="plan-grid">
+      <div class="plan-card"><div class="pc-num">01</div><div class="pc-title">Le Contexte</div><div class="pc-slides">Slides 3–4</div><div class="pc-desc">Problème & solution proposée</div></div>
+      <div class="plan-card"><div class="pc-num">02</div><div class="pc-title">Les Rôles</div><div class="pc-slides">Slides 5–6</div><div class="pc-desc">4 profils, fonctionnalités</div></div>
+      <div class="plan-card"><div class="pc-num">03</div><div class="pc-title">L'Architecture</div><div class="pc-slides">Slide 7</div><div class="pc-desc">Stack technique complet</div></div>
+      <div class="plan-card"><div class="pc-num">04</div><div class="pc-title">Les Fonctions Clés</div><div class="pc-slides">Slides 8–11</div><div class="pc-desc">Messagerie, carte, dons, admin</div></div>
+      <div class="plan-card"><div class="pc-num">05</div><div class="pc-title">La Roadmap</div><div class="pc-slides">Slide 12</div><div class="pc-desc">Déploiement & Firebase</div></div>
+      <div class="plan-card" style="border-color:rgba(212,175,55,.3)"><div class="pc-num">06</div><div class="pc-title">La Vision</div><div class="pc-slides">Slide 13</div><div class="pc-desc">Impact & perspectives</div></div>
+    </div>
+  </div>
+  <button class="speech-toggle" onclick="event.stopPropagation();toggleSpeech(this,'sp2')">Notes ↑</button>
+  <div class="speech-panel" id="sp2">
+    <div class="sp-header"><span class="sp-label">Ce que tu dis</span><button class="sp-close" onclick="closeSp('sp2')">✕</button></div>
+    <div class="sp-points">
+      <div class="sp-point"><div class="sp-bullet">1</div><div class="sp-text"><strong>Présenter le plan :</strong> "Je vais vous guider à travers six étapes : du problème que j'ai identifié jusqu'à la vision long terme. 13 slides. Je suis disponible pour vos questions à chaque étape."</div></div>
+      <div class="sp-divider"></div>
+      <div class="sp-point"><div class="sp-bullet">!</div><div class="sp-text"><strong>Ton :</strong> Slide rapide — 30 secondes. Donner les repères et passer à la suite.</div></div>
+    </div>
+  </div>
+</div>
 
-        let cur = 0, overview = false;
-        const world = document.getElementById('world');
-        const stage = document.getElementById('stage');
-        const W = () => window.innerWidth, H = () => window.innerHeight;
+<!-- ═══════ S3 — PROBLÈME ═══════ -->
+<div class="slide" id="s3" onclick="goTo(2)">
+  <div class="s3-glow"></div><div class="s3-glow2"></div>
+  <div class="s3-pad">
+    <div class="kicker" style="color:var(--or)">01 · Le Contexte — Le Problème</div>
+    <div class="big-stat">3<em> acteurs</em></div>
+    <div class="big-lbl">ONG, bailleurs et bénéficiaires agissent séparément, sans plateforme commune, sans visibilité et sans coordination réelle.</div>
+    <div class="s3-metrics">
+      <div class="s3-m"><div class="s3-mn">120<em>+</em></div><div class="s3-ml">ONG actives<br>en Afrique de l'Ouest</div></div>
+      <div class="s3-m"><div class="s3-mn">30<em>K</em></div><div class="s3-ml">Bénéficiaires potentiels<br>sans accès aux programmes</div></div>
+      <div class="s3-m"><div class="s3-mn" style="color:var(--or)">0</div><div class="s3-ml">Plateforme centralisée<br>pour tous les acteurs</div></div>
+    </div>
+  </div>
+  <button class="speech-toggle" onclick="event.stopPropagation();toggleSpeech(this,'sp3')">Notes ↑</button>
+  <div class="speech-panel" id="sp3">
+    <div class="sp-header"><span class="sp-label">Ce que tu dis</span><button class="sp-close" onclick="closeSp('sp3')">✕</button></div>
+    <div class="sp-points">
+      <div class="sp-point"><div class="sp-bullet">1</div><div class="sp-text"><strong>Le problème en chiffres :</strong> "3 acteurs qui s'ignorent. Des ONG sans visibilité. Des bailleurs sans canal fiable. Des bénéficiaires qui ne savent pas quels programmes existent près d'eux."</div></div>
+      <div class="sp-divider"></div>
+      <div class="sp-point"><div class="sp-bullet">2</div><div class="sp-text"><strong>Le paradoxe :</strong> "En 2025, il n'existe aucune plateforme centralisée dédiée à la mise en relation humanitaire en Afrique francophone. C'est précisément le vide que SocialLink comble."</div></div>
+      <div class="sp-divider"></div>
+      <div class="sp-point"><div class="sp-bullet">3</div><div class="sp-text"><strong>Transition :</strong> "Voyons comment SocialLink répond concrètement à ces trois problèmes."</div></div>
+    </div>
+  </div>
+</div>
 
-        function fit(s) {
-            const scX = W() / s.w, scY = H() / s.h, sc = Math.min(scX, scY) * .92;
-            const cx = s.x + s.w / 2, cy = s.y + s.h / 2;
-            const tx = W() / 2 - cx * sc, ty = H() / 2 - cy * sc;
-            return `translate(${tx}px,${ty}px) scale(${sc})`;
-        }
+<!-- ═══════ S4 — SOLUTION ═══════ -->
+<div class="slide" id="s4" onclick="goTo(3)">
+  <div class="s4-pad">
+    <div class="kicker">01 · Le Contexte — La Solution</div>
+    <div class="slide-title" style="color:#1A2340">SocialLink :<br>une plateforme, <em>quatre acteurs.</em></div>
+    <div class="flow-steps">
+      <div class="flow-step"><div class="fs-num">01</div><div class="fs-title">ONG crée</div><div class="fs-desc">Publie ses programmes humanitaires avec localisation, objectifs et besoins.</div></div>
+      <div class="flow-step"><div class="fs-num">02</div><div class="fs-title">Bailleur donne</div><div class="fs-desc">Fait un don en FCFA, suit son impact, et peut proposer son expertise.</div></div>
+      <div class="flow-step"><div class="fs-num">03</div><div class="fs-title">Bénéficiaire trouve</div><div class="fs-desc">Découvre les programmes disponibles près de chez lui et s'inscrit.</div></div>
+      <div class="flow-step"><div class="fs-num">04</div><div class="fs-title">Admin supervise</div><div class="fs-desc">Vue globale en lecture seule, interagit via la messagerie avec tous.</div></div>
+    </div>
+    <div class="s4-tags">
+      <div class="tag blue">Flutter Android</div>
+      <div class="tag blue">Firebase Firestore</div>
+      <div class="tag gold">Authentification 3 méthodes</div>
+      <div class="tag gold">Messagerie temps réel</div>
+      <div class="tag blue">OpenStreetMap gratuit</div>
+      <div class="tag gold">Système de dons FCFA</div>
+      <div class="tag blue">Notifications push FCM</div>
+      <div class="tag">Niveaux de confiance ONG</div>
+    </div>
+  </div>
+  <button class="speech-toggle" onclick="event.stopPropagation();toggleSpeech(this,'sp4')">Notes ↑</button>
+  <div class="speech-panel" id="sp4">
+    <div class="sp-header"><span class="sp-label">Ce que tu dis</span><button class="sp-close" onclick="closeSp('sp4')">✕</button></div>
+    <div class="sp-points">
+      <div class="sp-point"><div class="sp-bullet">1</div><div class="sp-text"><strong>Le flow :</strong> "SocialLink fonctionne en 4 mouvements. Une ONG publie son programme. Un bailleur le voit, fait un don. Un bénéficiaire s'inscrit. L'admin supervise tout."</div></div>
+      <div class="sp-divider"></div>
+      <div class="sp-point"><div class="sp-bullet">2</div><div class="sp-text"><strong>Sur la technologie :</strong> "Développée en Flutter — une seule base de code pour Android et le web. Firebase comme backend : zéro serveur à gérer, disponible 24h/24."</div></div>
+      <div class="sp-divider"></div>
+      <div class="sp-point"><div class="sp-bullet">3</div><div class="sp-text"><strong>Sur OpenStreetMap :</strong> "J'ai choisi OpenStreetMap à la place de Google Maps — 100% gratuit, pas de carte bancaire requise, et les données sont mises à jour par la communauté."</div></div>
+    </div>
+  </div>
+</div>
 
-        function goTo(i) {
-            if (overview) { toggleOverview(); setTimeout(() => goTo(i), 500); return; }
-            cur = i;
-            world.style.transition = 'transform .85s cubic-bezier(.4,0,.2,1)';
-            world.style.transform = fit(slides[i]);
-            document.querySelectorAll('.dot').forEach((d, j) => d.classList.toggle('active', j === i));
-            document.getElementById('counter').textContent = `${i + 1} / ${slides.length}`;
-            document.getElementById('progress').style.width = `${(i + 1) / slides.length * 100}%`;
-            document.getElementById('hud-title').textContent = ['COVER', 'PLAN', 'PROBLÈME', 'SOLUTION', 'LES RÔLES', 'FONCTIONNALITÉS', 'ARCHITECTURE', 'NIVEAUX CONFIANCE', 'SYSTÈME DONS', 'CARTE', 'ADMIN', 'ROADMAP', 'VISION'][i] + ' — SocialLink';
-        }
+<!-- ═══════ S5 — ROLES ═══════ -->
+<div class="slide" id="s5" onclick="goTo(4)">
+  <div class="s5-pad">
+    <div class="kicker">02 · Les Rôles</div>
+    <div class="slide-title" style="color:#1A2340">Quatre profils,<br>des accès <em>strictement séparés.</em></div>
+    <div class="slide-sub" style="color:var(--muted)">Chaque utilisateur n'accède qu'aux fonctionnalités de son rôle. La déconnexion est requise pour changer de profil.</div>
+    <div class="roles-grid">
+      <div class="role-card rc-ong">
+        <span class="rc-icon">🏢</span>
+        <div class="rc-title">ONG</div>
+        <div class="rc-items">
+          Créer des programmes<br>
+          Gérer les inscriptions<br>
+          Confirmer les dons<br>
+          Statistiques & rapports<br>
+          Trouver des experts
+        </div>
+        <span class="rc-badge blue">Niveau de confiance</span>
+      </div>
+      <div class="role-card rc-bailleur">
+        <span class="rc-icon">💛</span>
+        <div class="rc-title">Bailleur / Expert</div>
+        <div class="rc-items">
+          Faire des dons FCFA<br>
+          Historique des dons<br>
+          Devenir personne ressource<br>
+          Messagerie avec ONG<br>
+          Voir la carte
+        </div>
+        <span class="rc-badge gold">Confirmation ONG requise</span>
+      </div>
+      <div class="role-card rc-benef">
+        <span class="rc-icon">🤝</span>
+        <div class="rc-title">Bénéficiaire</div>
+        <div class="rc-items">
+          Voir les programmes<br>
+          S'inscrire à un programme<br>
+          Messagerie avec ONG<br>
+          Carte interactive<br>
+          Recherche & filtres
+        </div>
+        <span class="rc-badge green">Accès lecture seule invité</span>
+      </div>
+      <div class="role-card rc-admin">
+        <span class="rc-icon">🛡️</span>
+        <div class="rc-title">Administrateur</div>
+        <div class="rc-items">
+          Supervision complète<br>
+          Statistiques globales<br>
+          Voir tous les utilisateurs<br>
+          Voir tous les dons<br>
+          Messagerie uniquement
+        </div>
+        <span class="rc-badge dark">Lecture seule</span>
+      </div>
+    </div>
+  </div>
+  <button class="speech-toggle" onclick="event.stopPropagation();toggleSpeech(this,'sp5')">Notes ↑</button>
+  <div class="speech-panel" id="sp5">
+    <div class="sp-header"><span class="sp-label">Ce que tu dis</span><button class="sp-close" onclick="closeSp('sp5')">✕</button></div>
+    <div class="sp-points">
+      <div class="sp-point"><div class="sp-bullet">1</div><div class="sp-text"><strong>La séparation des rôles :</strong> "Un point important de sécurité : chaque rôle est strictement isolé. Un bénéficiaire ne peut pas accéder au tableau de bord ONG. Un bailleur ne voit pas les données admin. C'est géré au niveau de Firebase Firestore."</div></div>
+      <div class="sp-divider"></div>
+      <div class="sp-point"><div class="sp-bullet">2</div><div class="sp-text"><strong>Sur l'admin :</strong> "L'administrateur a une vue globale — mais il ne peut rien modifier. Il peut seulement lire et utiliser la messagerie. C'est un rôle de supervision, pas de gestion."</div></div>
+      <div class="sp-divider"></div>
+      <div class="sp-point"><div class="sp-bullet">3</div><div class="sp-text"><strong>Sur les invités :</strong> "Un visiteur non connecté peut consulter les programmes et la carte — mais toute action redirige vers l'inscription."</div></div>
+    </div>
+  </div>
+</div>
 
-        function next() { if (cur < slides.length - 1) goTo(cur + 1); }
-        function prev() { if (cur > 0) goTo(cur - 1); }
+<!-- ═══════ S6 — FONCTIONNALITES ═══════ -->
+<div class="slide" id="s6" onclick="goTo(5)">
+  <div class="s6-pad">
+    <div class="kicker" style="color:rgba(255,255,255,.5)">02 · Les Rôles — Fonctionnalités</div>
+    <div class="slide-title" style="color:#fff">12 fonctionnalités<br>pour un <em>impact complet.</em></div>
+    <div class="feat-grid">
+      <div class="feat-card"><span class="feat-icon">🔐</span><div class="feat-title">Authentification triple</div><div class="feat-desc">Email, Google Sign-In et SMS avec code OTP. Sécurité Firebase Auth.</div><span class="feat-tag">FIREBASE AUTH</span></div>
+      <div class="feat-card"><span class="feat-icon">💬</span><div class="feat-title">Messagerie temps réel</div><div class="feat-desc">Texte, images et fichiers entre tous les acteurs. Badges non lus.</div><span class="feat-tag">FIRESTORE STREAMS</span></div>
+      <div class="feat-card"><span class="feat-icon">💳</span><div class="feat-title">Système de dons FCFA</div><div class="feat-desc">Dons en attente jusqu'à confirmation ONG. Message automatique envoyé.</div><span class="feat-tag">VALIDATION ONG</span></div>
+      <div class="feat-card"><span class="feat-icon">🗺️</span><div class="feat-title">Carte interactive</div><div class="feat-desc">OpenStreetMap. Géolocalisation, filtres par catégorie, markers dorés.</div><span class="feat-tag">OPENSTREETMAP</span></div>
+      <div class="feat-card"><span class="feat-icon">🔍</span><div class="feat-title">Recherche avancée</div><div class="feat-desc">Filtres par catégorie, spécialité et localisation pour programmes et experts.</div><span class="feat-tag">FIRESTORE QUERY</span></div>
+      <div class="feat-card"><span class="feat-icon">🔔</span><div class="feat-title">Notifications push</div><div class="feat-desc">Firebase Cloud Messaging. Notification au bailleur lors de la confirmation.</div><span class="feat-tag">FIREBASE FCM</span></div>
+      <div class="feat-card"><span class="feat-icon">📊</span><div class="feat-title">Statistiques ONG</div><div class="feat-desc">Tableau de bord avec programmes, bénéficiaires, fonds collectés et progression.</div><span class="feat-tag">DASHBOARD</span></div>
+      <div class="feat-card"><span class="feat-icon">🥇</span><div class="feat-title">Niveaux de confiance</div><div class="feat-desc">Bronze, Argent, Or, Platine selon les performances de l'ONG. Badge visible.</div><span class="feat-tag">GAMIFICATION</span></div>
+      <div class="feat-card"><span class="feat-icon">🎓</span><div class="feat-title">Personnes ressources</div><div class="feat-desc">Experts bénévoles ou rémunérés : médecins, juristes, formateurs...</div><span class="feat-tag">PROFIL EXPERT</span></div>
+    </div>
+  </div>
+  <button class="speech-toggle" onclick="event.stopPropagation();toggleSpeech(this,'sp6')">Notes ↑</button>
+  <div class="speech-panel" id="sp6">
+    <div class="sp-header"><span class="sp-label">Ce que tu dis</span><button class="sp-close" onclick="closeSp('sp6')">✕</button></div>
+    <div class="sp-points">
+      <div class="sp-point"><div class="sp-bullet">1</div><div class="sp-text"><strong>Survoler les 9 fonctions :</strong> "L'application comporte 12 fonctionnalités majeures. Je vais en détailler quelques-unes dans les slides suivantes — les plus importantes techniquement."</div></div>
+      <div class="sp-divider"></div>
+      <div class="sp-point"><div class="sp-bullet">2</div><div class="sp-text"><strong>Sur la gamification :</strong> "J'ai ajouté un système de niveaux de confiance pour les ONG — Bronze, Argent, Or, Platine — calculé automatiquement selon le nombre de programmes et de bénéficiaires. Ça crée une émulation positive."</div></div>
+    </div>
+  </div>
+</div>
 
-        function toggleOverview() {
-            overview = !overview;
-            if (overview) {
-                world.style.transition = 'transform .9s cubic-bezier(.4,0,.2,1)';
-                const allX = slides.map(s => s.x), allY = slides.map(s => s.y);
-                const minX = Math.min(...allX) - 100, minY = Math.min(...allY) - 100;
-                const maxX = Math.max(...slides.map(s => s.x + s.w)) + 100;
-                const maxY = Math.max(...slides.map(s => s.y + s.h)) + 100;
-                const sc = Math.min(W() / (maxX - minX), H() / (maxY - minY)) * .9;
-                world.style.transform = `translate(${W() / 2 - (minX + (maxX - minX) / 2) * sc}px,${H() / 2 - (minY + (maxY - minY) / 2) * sc}px) scale(${sc})`;
-            } else {
-                goTo(cur);
-            }
-        }
+<!-- ═══════ S7 — ARCHITECTURE ═══════ -->
+<div class="slide" id="s7" onclick="goTo(6)">
+  <div class="s7-pad">
+    <div class="kicker">03 · Architecture Technique</div>
+    <div class="slide-title" style="color:#1A2340">Une seule base de code,<br>un <em>écosystème complet.</em></div>
+    <div class="tech-grid">
+      <div class="tech-card"><div class="tech-icon ti-blue">📱</div><div><div class="tech-name">Flutter (Dart)</div><div class="tech-desc">Framework cross-platform. Une base de code unique pour Android et Flutter Web. Style Luxury Noir & Bleu & Or, animations au scroll.</div></div></div>
+      <div class="tech-card"><div class="tech-icon ti-gold">🔥</div><div><div class="tech-name">Firebase Firestore</div><div class="tech-desc">Base de données NoSQL temps réel. Streams pour messagerie et dons. Règles de sécurité strictes par rôle.</div></div></div>
+      <div class="tech-card"><div class="tech-icon ti-blue">🔐</div><div><div class="tech-name">Firebase Auth</div><div class="tech-desc">Authentification email, Google Sign-In et SMS (OTP). Redirection automatique selon le rôle Firestore.</div></div></div>
+      <div class="tech-card"><div class="tech-icon ti-gold">🗺️</div><div><div class="tech-name">OpenStreetMap</div><div class="tech-desc">Cartographie 100% gratuite via flutter_map + latlong2. Géolocalisation avec geolocator. Zéro carte bancaire.</div></div></div>
+      <div class="tech-card"><div class="tech-icon ti-green">📦</div><div><div class="tech-name">Firebase Storage</div><div class="tech-desc">Stockage des images et fichiers de la messagerie. Règles de sécurité : 10 MB max par fichier.</div></div></div>
+      <div class="tech-card"><div class="tech-icon ti-dark">🌐</div><div><div class="tech-name">Firebase Hosting</div><div class="tech-desc">Déploiement Flutter Web + Landing page React. URL publique HTTPS. PWA installable sur mobile.</div></div></div>
+    </div>
+    <div class="tech-stack">
+      <div class="ts-label">Packages Flutter principaux</div>
+      <div class="ts-tag">firebase_core</div><div class="ts-tag">firebase_auth</div><div class="ts-tag">cloud_firestore</div><div class="ts-tag">firebase_storage</div><div class="ts-tag">firebase_messaging</div><div class="ts-tag">flutter_map</div><div class="ts-tag">image_picker</div><div class="ts-tag">file_picker</div><div class="ts-tag">intl</div><div class="ts-tag">cached_network_image</div>
+    </div>
+  </div>
+  <button class="speech-toggle" onclick="event.stopPropagation();toggleSpeech(this,'sp7')">Notes ↑</button>
+  <div class="speech-panel" id="sp7">
+    <div class="sp-header"><span class="sp-label">Ce que tu dis</span><button class="sp-close" onclick="closeSp('sp7')">✕</button></div>
+    <div class="sp-points">
+      <div class="sp-point"><div class="sp-bullet">1</div><div class="sp-text"><strong>Sur Flutter :</strong> "J'ai choisi Flutter pour une raison précise : une seule base de code en Dart génère à la fois l'APK Android et le site web. Deux livrables, un seul travail."</div></div>
+      <div class="sp-divider"></div>
+      <div class="sp-point"><div class="sp-bullet">2</div><div class="sp-text"><strong>Sur Firebase :</strong> "Firebase joue le rôle de backend complet — base de données, authentification, stockage, notifications. Zéro serveur à configurer, disponible mondialement."</div></div>
+      <div class="sp-divider"></div>
+      <div class="sp-point"><div class="sp-bullet">3</div><div class="sp-text"><strong>Sur OpenStreetMap :</strong> "Google Maps exige une carte bancaire pour l'API. J'ai opté pour OpenStreetMap — 100% gratuit, open source, et suffisamment précis pour l'Afrique de l'Ouest."</div></div>
+    </div>
+  </div>
+</div>
 
-        // Dots
-        const dotsEl = document.getElementById('dots');
-        slides.forEach((_, i) => {
-            const d = document.createElement('div');
-            d.className = 'dot' + (i === 0 ? ' active' : '');
-            d.onclick = () => goTo(i);
-            dotsEl.appendChild(d);
-        });
+<!-- ═══════ S8 — NIVEAUX CONFIANCE ═══════ -->
+<div class="slide" id="s8" onclick="goTo(7)">
+  <div class="s8-pad">
+    <div class="kicker" style="color:rgba(255,255,255,.5)">04 · Fonctions Clés — Niveaux de Confiance</div>
+    <div class="slide-title" style="color:#fff">La confiance se <em>gagne.</em><br>Elle se voit.</div>
+    <div style="font-size:14px;color:rgba(255,255,255,.4);max-width:600px;line-height:1.7;margin-top:10px;margin-bottom:28px">Calculé automatiquement selon les performances de l'ONG. Visible par tous les visiteurs sur les programmes et les profils.</div>
+    <div class="levels-wrap">
+      <div class="level-card lc-bronze">
+        <span class="lc-emoji">🥉</span>
+        <div class="lc-name">Bronze</div>
+        <div class="lc-req">1 programme créé<br>Premiers pas sur la plateforme</div>
+        <div class="lc-bar"></div>
+      </div>
+      <div class="level-card lc-silver">
+        <span class="lc-emoji">🥈</span>
+        <div class="lc-name">Argent</div>
+        <div class="lc-req">3+ programmes<br>5+ bénéficiaires inscrits</div>
+        <div class="lc-bar"></div>
+      </div>
+      <div class="level-card lc-gold">
+        <span class="lc-emoji">🥇</span>
+        <div class="lc-name">Or</div>
+        <div class="lc-req">10+ programmes<br>50+ bénéficiaires</div>
+        <div class="lc-bar"></div>
+      </div>
+      <div class="level-card lc-plat">
+        <span class="lc-emoji">💎</span>
+        <div class="lc-name">Platine</div>
+        <div class="lc-req">20+ programmes<br>200+ bénéficiaires</div>
+        <div class="lc-bar"></div>
+      </div>
+    </div>
+    <div class="s8-note">Le badge est affiché sur chaque programme publié par l'ONG — <em>visible par les bailleurs et bénéficiaires</em> pour renforcer la crédibilité et encourager les dons vers les ONG les plus actives.</div>
+  </div>
+  <button class="speech-toggle" onclick="event.stopPropagation();toggleSpeech(this,'sp8')">Notes ↑</button>
+  <div class="speech-panel" id="sp8">
+    <div class="sp-header"><span class="sp-label">Ce que tu dis</span><button class="sp-close" onclick="closeSp('sp8')">✕</button></div>
+    <div class="sp-points">
+      <div class="sp-point"><div class="sp-bullet">1</div><div class="sp-text"><strong>L'idée :</strong> "J'ai voulu gamifier l'engagement des ONG. Plus une ONG est active — plus elle crée de programmes, plus elle touche de bénéficiaires — plus son niveau monte. C'est visible par tous."</div></div>
+      <div class="sp-divider"></div>
+      <div class="sp-point"><div class="sp-bullet">2</div><div class="sp-text"><strong>L'impact :</strong> "Un bailleur qui voit une ONG Platine sait qu'elle est sérieuse, active et efficace. Ça crée une confiance numérique — comme les étoiles sur Airbnb."</div></div>
+      <div class="sp-divider"></div>
+      <div class="sp-point"><div class="sp-bullet">3</div><div class="sp-text"><strong>Techniquement :</strong> "C'est calculé côté client en Dart à partir des données Firestore en temps réel. Aucun calcul serveur nécessaire."</div></div>
+    </div>
+  </div>
+</div>
 
-        // Keys
-        document.addEventListener('keydown', e => {
-            if (e.key === 'ArrowRight' || e.key === ' ') next();
-            if (e.key === 'ArrowLeft') prev();
-            if (e.key.toLowerCase() === 'o') toggleOverview();
-            if (e.key === 'Escape' && overview) toggleOverview();
-        });
+<!-- ═══════ S9 — SYSTEME DONS ═══════ -->
+<div class="slide" id="s9" onclick="goTo(8)">
+  <div class="s9-pad">
+    <div class="kicker">04 · Fonctions Clés — Système de Dons</div>
+    <div class="slide-title" style="color:#1A2340">Un don transparent,<br><em>validé avant</em> d'être comptabilisé.</div>
+    <div class="msg-flow">
+      <div class="msg-step ms1">
+        <span class="ms-icon">💳</span>
+        <div class="ms-title">Bailleur fait un don</div>
+        <div class="ms-desc">Choisit un montant en FCFA (prédefini ou libre), sélectionne la méthode de paiement (Mobile Money, carte, virement). Statut : EN ATTENTE.</div>
+        <span class="ms-tag">STATUS: PENDING</span>
+      </div>
+      <div class="msg-step ms2">
+        <span class="ms-icon">💬</span>
+        <div class="ms-title">Message automatique</div>
+        <div class="ms-desc">Un message est envoyé automatiquement à l'ONG dans la messagerie : montant, programme concerné, message du bailleur.</div>
+        <span class="ms-tag">CHAT AUTO-CRÉÉ</span>
+      </div>
+      <div class="msg-step ms3">
+        <span class="ms-icon">✅</span>
+        <div class="ms-title">ONG confirme</div>
+        <div class="ms-desc">L'ONG voit le don dans son tableau de bord et clique CONFIRMER. Le montant est alors ajouté au programme. Message de confirmation envoyé au bailleur.</div>
+        <span class="ms-tag">STATUS: CONFIRMED</span>
+      </div>
+    </div>
+    <div class="s9-don">
+      <div class="s9-don-icon">⚡</div>
+      <div class="s9-don-text">
+        <div class="s9-don-title">Tant que le don n'est pas confirmé par l'ONG...</div>
+        <div class="s9-don-desc">Le montant n'est pas ajouté au programme. L'historique du bailleur ne comptabilise que les dons confirmés. Transparence totale.</div>
+      </div>
+      <div class="s9-don-badge">VALIDATION ONG</div>
+    </div>
+  </div>
+  <button class="speech-toggle" onclick="event.stopPropagation();toggleSpeech(this,'sp9')">Notes ↑</button>
+  <div class="speech-panel" id="sp9">
+    <div class="sp-header"><span class="sp-label">Ce que tu dis</span><button class="sp-close" onclick="closeSp('sp9')">✕</button></div>
+    <div class="sp-points">
+      <div class="sp-point"><div class="sp-bullet">1</div><div class="sp-text"><strong>Le problème que ça résout :</strong> "Dans beaucoup de plateformes, le don est affiché immédiatement même si l'ONG ne l'a pas reçu. J'ai voulu éviter ça. Ici, le don est EN ATTENTE jusqu'à confirmation explicite de l'ONG."</div></div>
+      <div class="sp-divider"></div>
+      <div class="sp-point"><div class="sp-bullet">2</div><div class="sp-text"><strong>Techniquement :</strong> "J'utilise un batch Firestore : le don est créé avec status 'pending', et un message automatique est envoyé dans le chat ONG-Bailleur. Quand l'ONG confirme, le batch met à jour le statut ET incrémente raisedAmount du programme en une seule transaction atomique."</div></div>
+      <div class="sp-divider"></div>
+      <div class="sp-point"><div class="sp-bullet">3</div><div class="sp-text"><strong>L'UX bailleur :</strong> "Le bailleur reçoit une notification push quand son don est confirmé. Et l'historique de ses dons ne montre que les montants réellement validés."</div></div>
+    </div>
+  </div>
+</div>
 
-        // Cursor
-        const cursor = document.getElementById('cursor');
-        document.addEventListener('mousemove', e => {
-            cursor.style.left = e.clientX + 'px';
-            cursor.style.top = e.clientY + 'px';
-        });
-        document.addEventListener('mousedown', () => cursor.classList.add('big'));
-        document.addEventListener('mouseup', () => cursor.classList.remove('big'));
+<!-- ═══════ S10 — CARTE ═══════ -->
+<div class="slide" id="s10" onclick="goTo(9)">
+  <div class="s10-pad">
+    <div class="kicker" style="color:rgba(255,255,255,.5)">04 · Fonctions Clés — Carte Interactive</div>
+    <div class="slide-title" style="color:#fff">Localiser les ONG<br>et programmes<br><em>sans frais.</em></div>
+    <div class="map-features">
+      <div class="mf-card"><div class="mf-icon">📍</div><div><div class="mf-title">Markers ONG & Programmes</div><div class="mf-desc">Chaque programme avec coordonnées GPS apparaît sur la carte. Clic → fiche détail.</div></div></div>
+      <div class="mf-card"><div class="mf-icon">🎯</div><div><div class="mf-title">Géolocalisation utilisateur</div><div class="mf-desc">Le marker bleu indique la position de l'utilisateur. Centrage automatique.</div></div></div>
+      <div class="mf-card"><div class="mf-icon">🔽</div><div><div class="mf-title">Filtres par catégorie</div><div class="mf-desc">Alimentation, Santé, Éducation, Eau, Formation — filtrage des markers en temps réel.</div></div></div>
+      <div class="mf-card"><div class="mf-icon">🌙</div><div><div class="mf-title">Style sombre personnalisé</div><div class="mf-desc">Tuiles OpenStreetMap avec style JSON dark pour cohérence avec l'interface.</div></div></div>
+    </div>
+    <div class="s10-osm">
+      <span style="font-size:24px">🗺️</span>
+      <div>Technologie : <em>flutter_map + latlong2 + geolocator</em> — 100% open source, zéro coût, zéro carte bancaire. Google Maps aurait coûté jusqu'à 200$ / mois au-delà du quota gratuit.</div>
+    </div>
+  </div>
+  <button class="speech-toggle" onclick="event.stopPropagation();toggleSpeech(this,'sp10')">Notes ↑</button>
+  <div class="speech-panel" id="sp10">
+    <div class="sp-header"><span class="sp-label">Ce que tu dis</span><button class="sp-close" onclick="closeSp('sp10')">✕</button></div>
+    <div class="sp-points">
+      <div class="sp-point"><div class="sp-bullet">1</div><div class="sp-text"><strong>Le choix technique :</strong> "Google Maps SDK pour Android est gratuit jusqu'à un quota, puis facturable. J'ai choisi OpenStreetMap via le package flutter_map — entièrement gratuit, pas de quota, pas de clé API bancaire."</div></div>
+      <div class="sp-divider"></div>
+      <div class="sp-point"><div class="sp-bullet">2</div><div class="sp-text"><strong>Le style :</strong> "J'ai personnalisé le style de la carte en JSON pour qu'elle soit cohérente avec le thème noir et or de l'application."</div></div>
+      <div class="sp-divider"></div>
+      <div class="sp-point"><div class="sp-bullet">3</div><div class="sp-text"><strong>Les filtres :</strong> "Les markers se filtrent en temps réel selon la catégorie du programme — Alimentation, Santé, Éducation — sans rechargement de page."</div></div>
+    </div>
+  </div>
+</div>
 
-        // Speech panels
-        function toggleSpeech(btn, id) {
-            const panel = document.getElementById(id);
-            const isOpen = panel.classList.contains('open');
-            document.querySelectorAll('.speech-panel').forEach(p => p.classList.remove('open'));
-            document.querySelectorAll('.speech-toggle').forEach(b => b.classList.remove('active'));
-            if (!isOpen) { panel.classList.add('open'); btn.classList.add('active'); btn.textContent = 'Notes ↓'; }
-            else { btn.textContent = 'Notes ↑'; }
-        }
-        function closeSp(id) {
-            document.getElementById(id).classList.remove('open');
-            document.querySelectorAll('.speech-toggle').forEach(b => { b.classList.remove('active'); b.textContent = 'Notes ↑'; });
-        }
+<!-- ═══════ S11 — ADMIN ═══════ -->
+<div class="slide" id="s11" onclick="goTo(10)">
+  <div class="s11-pad">
+    <div class="kicker">04 · Fonctions Clés — Supervision Admin</div>
+    <div class="slide-title" style="color:#1A2340">Tout voir.<br>Ne rien <em>modifier.</em></div>
+    <div style="font-size:14px;color:var(--muted);max-width:600px;line-height:1.7;margin-top:10px;margin-bottom:28px">L'administrateur dispose d'une vue complète en lecture seule de toute la plateforme. Son seul pouvoir d'action : la messagerie.</div>
+    <div class="admin-grid">
+      <div class="admin-card"><div class="ac-icon">👥</div><div class="ac-title">Tous les utilisateurs</div><div class="ac-desc">Liste filtrée par rôle, statut, date d'inscription. Peut contacter via messagerie.</div><span class="ac-note">LECTURE SEULE</span></div>
+      <div class="admin-card"><div class="ac-icon">📋</div><div class="ac-title">Tous les programmes</div><div class="ac-desc">Vue globale des programmes actifs, en attente et rejetés. Statistiques d'inscription.</div><span class="ac-note">LECTURE SEULE</span></div>
+      <div class="admin-card"><div class="ac-icon">💰</div><div class="ac-title">Tous les dons</div><div class="ac-desc">Historique complet avec statuts (pending, confirmed, rejected). Total FCFA collecté.</div><span class="ac-note">LECTURE SEULE</span></div>
+      <div class="admin-card"><div class="ac-icon">📊</div><div class="ac-title">Statistiques globales</div><div class="ac-desc">Nombre total d'utilisateurs, programmes, dons, experts, montant total confirmé.</div><span class="ac-note">TEMPS RÉEL</span></div>
+    </div>
+  </div>
+  <button class="speech-toggle" onclick="event.stopPropagation();toggleSpeech(this,'sp11')">Notes ↑</button>
+  <div class="speech-panel" id="sp11">
+    <div class="sp-header"><span class="sp-label">Ce que tu dis</span><button class="sp-close" onclick="closeSp('sp11')">✕</button></div>
+    <div class="sp-points">
+      <div class="sp-point"><div class="sp-bullet">1</div><div class="sp-text"><strong>Le principe :</strong> "J'ai volontairement limité les pouvoirs de l'admin. Il voit tout, mais ne peut rien modifier. Sa seule capacité d'action : la messagerie pour contacter n'importe quel utilisateur."</div></div>
+      <div class="sp-divider"></div>
+      <div class="sp-point"><div class="sp-bullet">2</div><div class="sp-text"><strong>Pourquoi ce choix :</strong> "Un admin qui peut tout modifier est un risque. Un admin qui supervise et communique est un outil de qualité. C'est un choix délibéré de conception."</div></div>
+      <div class="sp-divider"></div>
+      <div class="sp-point"><div class="sp-bullet">3</div><div class="sp-text"><strong>Techniquement :</strong> "Le rôle admin est stocké dans Firestore. Les règles de sécurité Firebase vérifient le rôle avant chaque lecture. Il est impossible de contourner ça côté client."</div></div>
+    </div>
+  </div>
+</div>
 
-        // Init
-        goTo(0);
-        window.addEventListener('resize', () => goTo(cur));
-    </script>
+<!-- ═══════ S12 — ROADMAP ═══════ -->
+<div class="slide" id="s12" onclick="goTo(11)">
+  <div class="s12-pad">
+    <div class="kicker" style="color:rgba(255,255,255,.5)">05 · La Roadmap — Déploiement</div>
+    <div class="slide-title" style="color:#fff">Du développement<br>au <em>Play Store.</em></div>
+    <div style="height:28px"></div>
+    <div class="roadmap-track">
+      <div class="rm-line"></div>
+      <div class="rm-phase"><div class="rm-dot on">🏗️</div><div class="rm-period">PHASE 1</div><div class="rm-title">Architecture</div><div class="rm-pts">Flutter + Firebase<br>Auth + Firestore<br>3 rôles</div><div class="rm-badge">✅ Fait</div></div>
+      <div class="rm-phase"><div class="rm-dot on">🎨</div><div class="rm-period">PHASE 2</div><div class="rm-title">UI & Fonctions</div><div class="rm-pts">Style Noir & Or<br>Messagerie<br>Carte OSM</div><div class="rm-badge">✅ Fait</div></div>
+      <div class="rm-phase"><div class="rm-dot on">⚡</div><div class="rm-period">PHASE 3</div><div class="rm-title">Avancé</div><div class="rm-pts">Dons + validation<br>Admin<br>Niveaux confiance</div><div class="rm-badge">✅ Fait</div></div>
+      <div class="rm-phase"><div class="rm-dot">🚀</div><div class="rm-period">PHASE 4</div><div class="rm-title">Déploiement</div><div class="rm-pts">APK release<br>Firebase Hosting<br>Landing page</div><div class="rm-badge" style="opacity:.5">En cours</div></div>
+      <div class="rm-phase"><div class="rm-dot">🌍</div><div class="rm-period">PHASE 5</div><div class="rm-title">Play Store</div><div class="rm-pts">Compte développeur<br>AAB signé<br>Publication</div><div class="rm-badge" style="opacity:.5">À venir</div></div>
+    </div>
+    <div class="firebase-strip"><strong>Firebase Hosting déployé :</strong> L'application Flutter Web et la landing page React sont accessibles publiquement via Firebase Hosting. L'APK Android est téléchargeable depuis la landing page. PWA installable sur mobile via le navigateur.</div>
+  </div>
+  <button class="speech-toggle" onclick="event.stopPropagation();toggleSpeech(this,'sp12')">Notes ↑</button>
+  <div class="speech-panel" id="sp12">
+    <div class="sp-header"><span class="sp-label">Ce que tu dis</span><button class="sp-close" onclick="closeSp('sp12')">✕</button></div>
+    <div class="sp-points">
+      <div class="sp-point"><div class="sp-bullet">1</div><div class="sp-text"><strong>Les 3 phases faites :</strong> "Les trois premières phases sont complètes. Architecture, interface, fonctionnalités avancées — tout est développé et fonctionnel."</div></div>
+      <div class="sp-divider"></div>
+      <div class="sp-point"><div class="sp-bullet">2</div><div class="sp-text"><strong>Sur le déploiement :</strong> "La phase 4 est en cours. L'APK est généré et testable. Firebase Hosting est configuré. La landing page React est prête avec le bouton de téléchargement."</div></div>
+      <div class="sp-divider"></div>
+      <div class="sp-point"><div class="sp-bullet">3</div><div class="sp-text"><strong>Sur le Play Store :</strong> "La phase 5 nécessite un compte Google Play Developer à 25$. L'AAB signé est généré. La publication est prévue dans les prochaines semaines."</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════ S13 — VISION ═══════ -->
+<div class="slide" id="s13" onclick="goTo(12)">
+  <div class="s13-bg"></div>
+  <div class="s13-pad">
+    <div class="s13-eyebrow">06 · La Vision</div>
+    <div class="s13-title">SocialLink, c'est la<br><em>plateforme de référence</em><br>de l'humanitaire<br>en Afrique de l'Ouest.</div>
+    <div class="s13-stats">
+      <div class="s13-stat"><div class="s13-stat-n">120+</div><div class="s13-stat-l">ONG cibles</div></div>
+      <div class="s13-stat"><div class="s13-stat-n">5K+</div><div class="s13-stat-l">Bailleurs</div></div>
+      <div class="s13-stat"><div class="s13-stat-n">30K+</div><div class="s13-stat-l">Bénéficiaires</div></div>
+      <div class="s13-stat"><div class="s13-stat-n">15+</div><div class="s13-stat-l">Pays couverts</div></div>
+    </div>
+    <div class="s13-sub">Connecter les acteurs humanitaires n'est pas un projet académique. C'est un besoin réel. SocialLink est la réponse technique et humaine à ce besoin.</div>
+    <div class="s13-tagline">Plateforme Humanitaire Mobile · Flutter · Firebase</div>
+    <div class="s13-logo">SOCIALLINK</div>
+    <div style="margin-top:14px;font-size:10px;color:rgba(255,255,255,.2);letter-spacing:3px">COTONOU · BÉNIN · 2025</div>
+  </div>
+  <button class="speech-toggle" onclick="event.stopPropagation();toggleSpeech(this,'sp13')">Notes ↑</button>
+  <div class="speech-panel" id="sp13">
+    <div class="sp-header"><span class="sp-label">Ce que tu dis</span><button class="sp-close" onclick="closeSp('sp13')">✕</button></div>
+    <div class="sp-points">
+      <div class="sp-point"><div class="sp-bullet">1</div><div class="sp-text"><strong>La vision :</strong> "SocialLink n'est pas qu'un projet de soutenance. C'est une réponse à un problème réel que je vois autour de moi — des ONG qui peinent à trouver des financements, des gens qui veulent aider mais ne savent pas comment."</div></div>
+      <div class="sp-divider"></div>
+      <div class="sp-point"><div class="sp-bullet">2</div><div class="sp-text"><strong>Ce que j'ai appris :</strong> "Ce projet m'a permis de maîtriser Flutter, Firebase, l'architecture multi-rôles, les streams temps réel, la sécurité Firestore, les animations Flutter, et le déploiement mobile."</div></div>
+      <div class="sp-divider"></div>
+      <div class="sp-point"><div class="sp-bullet">3</div><div class="sp-text"><strong>La clôture :</strong> "Ensemble pour un impact réel. Je vous remercie pour votre attention et suis disponible pour vos questions." <em>→ Silence. Sourire. Regard sur le jury.</em></div></div>
+      <div class="sp-divider"></div>
+      <div class="sp-point"><div class="sp-bullet">!</div><div class="sp-text"><strong>Ton :</strong> Lent, posé, convaincu. Ne cours pas sur ce dernier slide. C'est ta conclusion — laisse-la exister.</div></div>
+    </div>
+  </div>
+</div>
+
+</div><!-- /world -->
+</div><!-- /stage -->
+
+<div id="hud">
+  <button class="hbtn" onclick="prev()">←</button>
+  <div id="dots"></div>
+  <span id="counter">1 / 13</span>
+  <button class="hbtn" onclick="next()">→</button>
+</div>
+
+<script>
+const slides = [
+  {id:'s1', x:200,  y:200,  w:1440, h:900},
+  {id:'s2', x:2000, y:200,  w:1200, h:780},
+  {id:'s3', x:3500, y:200,  w:1320, h:820},
+  {id:'s4', x:200,  y:1400, w:1300, h:820},
+  {id:'s5', x:1800, y:1400, w:1320, h:820},
+  {id:'s6', x:3400, y:1400, w:1300, h:820},
+  {id:'s7', x:200,  y:2600, w:1320, h:820},
+  {id:'s8', x:1800, y:2600, w:1300, h:840},
+  {id:'s9', x:3400, y:2600, w:1260, h:800},
+  {id:'s10',x:200,  y:3800, w:1200, h:760},
+  {id:'s11',x:1700, y:3800, w:1200, h:760},
+  {id:'s12',x:3200, y:3800, w:1420, h:800},
+  {id:'s13',x:5000, y:3800, w:1320, h:860},
+];
+
+let cur = 0, overview = false;
+const world = document.getElementById('world');
+const stage = document.getElementById('stage');
+const W = () => window.innerWidth, H = () => window.innerHeight;
+
+function fit(s) {
+  const scX = W() / s.w, scY = H() / s.h, sc = Math.min(scX, scY) * .92;
+  const cx = s.x + s.w/2, cy = s.y + s.h/2;
+  const tx = W()/2 - cx*sc, ty = H()/2 - cy*sc;
+  return `translate(${tx}px,${ty}px) scale(${sc})`;
+}
+
+function goTo(i) {
+  if (overview) { toggleOverview(); setTimeout(() => goTo(i), 500); return; }
+  cur = i;
+  world.style.transition = 'transform .85s cubic-bezier(.4,0,.2,1)';
+  world.style.transform = fit(slides[i]);
+  document.querySelectorAll('.dot').forEach((d,j) => d.classList.toggle('active', j===i));
+  document.getElementById('counter').textContent = `${i+1} / ${slides.length}`;
+  document.getElementById('progress').style.width = `${(i+1)/slides.length*100}%`;
+  document.getElementById('hud-title').textContent = ['COVER','PLAN','PROBLÈME','SOLUTION','LES RÔLES','FONCTIONNALITÉS','ARCHITECTURE','NIVEAUX CONFIANCE','SYSTÈME DONS','CARTE','ADMIN','ROADMAP','VISION'][i] + ' — SocialLink';
+}
+
+function next() { if (cur < slides.length-1) goTo(cur+1); }
+function prev() { if (cur > 0) goTo(cur-1); }
+
+function toggleOverview() {
+  overview = !overview;
+  if (overview) {
+    world.style.transition = 'transform .9s cubic-bezier(.4,0,.2,1)';
+    const allX = slides.map(s=>s.x), allY = slides.map(s=>s.y);
+    const minX = Math.min(...allX)-100, minY = Math.min(...allY)-100;
+    const maxX = Math.max(...slides.map(s=>s.x+s.w))+100;
+    const maxY = Math.max(...slides.map(s=>s.y+s.h))+100;
+    const sc = Math.min(W()/(maxX-minX), H()/(maxY-minY)) * .9;
+    world.style.transform = `translate(${W()/2-(minX+(maxX-minX)/2)*sc}px,${H()/2-(minY+(maxY-minY)/2)*sc}px) scale(${sc})`;
+  } else {
+    goTo(cur);
+  }
+}
+
+// Dots
+const dotsEl = document.getElementById('dots');
+slides.forEach((_,i) => {
+  const d = document.createElement('div');
+  d.className = 'dot' + (i===0?' active':'');
+  d.onclick = () => goTo(i);
+  dotsEl.appendChild(d);
+});
+
+// Keys
+document.addEventListener('keydown', e => {
+  if (e.key==='ArrowRight'||e.key===' ') next();
+  if (e.key==='ArrowLeft') prev();
+  if (e.key.toLowerCase()==='o') toggleOverview();
+  if (e.key==='Escape' && overview) toggleOverview();
+});
+
+// Cursor
+const cursor = document.getElementById('cursor');
+document.addEventListener('mousemove', e => {
+  cursor.style.left = e.clientX+'px';
+  cursor.style.top = e.clientY+'px';
+});
+document.addEventListener('mousedown', () => cursor.classList.add('big'));
+document.addEventListener('mouseup', () => cursor.classList.remove('big'));
+
+// Speech panels
+function toggleSpeech(btn, id) {
+  const panel = document.getElementById(id);
+  const isOpen = panel.classList.contains('open');
+  document.querySelectorAll('.speech-panel').forEach(p => p.classList.remove('open'));
+  document.querySelectorAll('.speech-toggle').forEach(b => b.classList.remove('active'));
+  if (!isOpen) { panel.classList.add('open'); btn.classList.add('active'); btn.textContent = 'Notes ↓'; }
+  else { btn.textContent = 'Notes ↑'; }
+}
+function closeSp(id) {
+  document.getElementById(id).classList.remove('open');
+  document.querySelectorAll('.speech-toggle').forEach(b => { b.classList.remove('active'); b.textContent = 'Notes ↑'; });
+}
+
+// Init
+goTo(0);
+window.addEventListener('resize', () => goTo(cur));
+</script>
 </body>
-
 </html>
